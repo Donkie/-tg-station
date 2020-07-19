@@ -706,10 +706,12 @@
 	if(gloves)
 		if(SEND_SIGNAL(gloves, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_STRENGTH_BLOOD))
 			update_inv_gloves()
+			. = TRUE
 	else
 		if(bloody_hands)
 			bloody_hands = 0
 			update_inv_gloves()
+			. = TRUE
 
 //Turns a mob black, flashes a skeleton overlay
 //Just like a cartoon!

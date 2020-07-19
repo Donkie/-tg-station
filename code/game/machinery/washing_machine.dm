@@ -190,6 +190,7 @@ GLOBAL_LIST_INIT(dye_registry, list(
 	if(!busy && bloody_mess)
 		bloody_mess = FALSE
 		update_icon()
+		return TRUE
 
 /obj/machinery/washing_machine/proc/wash_cycle()
 	for(var/X in contents)

@@ -19,6 +19,7 @@
 	if(strength < CLEAN_STRENGTH_BLOOD)
 		return
 	transfer_blood = 0
+	return TRUE
 
 /obj/item/clothing/gloves/suicide_act(mob/living/carbon/user)
 	user.visible_message("<span class='suicide'>\the [src] are forcing [user]'s hands around [user.p_their()] neck! It looks like the gloves are possessed!</span>")

@@ -37,6 +37,7 @@
 /datum/component/infective/proc/clean(datum/source, clean_strength)
 	if(clean_strength >= min_clean_strength)
 		qdel(src)
+		return TRUE
 
 /datum/component/infective/proc/try_infect_buckle(datum/source, mob/M, force)
 	if(isliving(M))

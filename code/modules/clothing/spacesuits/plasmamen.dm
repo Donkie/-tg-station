@@ -123,6 +123,7 @@
 	if(smile)
 		smile = FALSE
 		cut_overlays()
+		return TRUE
 
 /obj/item/clothing/head/helmet/space/plasmaman/attack_self(mob/user)
 	on = !on

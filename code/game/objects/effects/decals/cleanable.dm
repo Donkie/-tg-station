@@ -105,6 +105,7 @@
 
 /obj/effect/decal/cleanable/proc/clean_react(datum/source, strength)
 	qdel(src)
+	return TRUE
 
 /obj/effect/decal/cleanable/proc/can_bloodcrawl_in()
 	if((blood_state != BLOOD_STATE_OIL) && (blood_state != BLOOD_STATE_NOT_BLOODY))
