@@ -100,7 +100,8 @@
 			S.blood_state = blood_state
 			update_icon()
 			H.update_inv_shoes()
-/atom/effect/decal/cleanable/washed(atom/washer)
+
+/obj/effect/decal/cleanable/washed(atom/washer)
 	. = ..()
 	qdel(src)
 
