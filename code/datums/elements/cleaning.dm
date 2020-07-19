@@ -15,12 +15,10 @@
 		return
 
 	SEND_SIGNAL(tile, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_STRENGTH_BLOOD)
-	for(var/A in tile)
-		if(is_cleanable(A))
-			qdel(A)
-		else if(istype(A, /obj/item))
+	for(var/atom/A in tile)
+		SEND_SIGNAL(A, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_STRENGTH_BLOOD)
+		if(istype(A, /obj/item))
 			var/obj/item/I = A
-			SEND_SIGNAL(I, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_STRENGTH_BLOOD)
 			if(ismob(I.loc))
 				var/mob/M = I.loc
 				M.regenerate_icons()

@@ -320,9 +320,9 @@
 		if(do_after(src, 1, target = T))
 			SEND_SIGNAL(T, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_MEDIUM)
 			visible_message("<span class='notice'>[src] cleans \the [T].</span>")
-			for(var/atom/dirtything in T)
+			for(var/atom/AM in T)
 				if(is_cleanable(dirtything))
-					qdel(dirtything)
+					SEND_SIGNAL(AM, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_MEDIUM)
 
 			target = null
 
