@@ -503,6 +503,30 @@ get_true_breath_pressure(pp) --> gas_pp = pp/breath_pp*total_moles()
 		//Actually transfer the gas
 		var/datum/gas_mixture/removed = remove(transfer_moles)
 		output_air.merge(removed)
+
+		// Calculate the work we did to transfer the gas
+		/*
+		Since the gas pump compresses in a pretty unrealistic way, we have to calculate the work done as the following:
+
+		// The theoretical volume of the input in the compressor, V = n * R * T / P
+		compression_volume = n * R * T / src.return_pressure()
+		// The theoretical volume of the output
+		compressed_volume = n * R * T / target_pressure
+
+		// According to wikipedia, the work necessary to compress a gas is: W = n * R * T * ln(compressed_volume / compression_volume)
+		// This is assuming it's a isothermic compression, that is, the compressor is also cooled
+		// https://en.wikipedia.org/w/index.php?title=Isothermal_process&oldid=969104473#Calculation_of_work
+		// Plug in the above two equations and we get
+		W = n * R * T * ln(target_pressure / src.return_pressure())
+		*/
+		var/input_starting_pressure = src.return_pressure()
+		if(input_starting_pressure > 1 && target_pressure > 1)
+			var/pressure_ratio = target_pressure / input_starting_pressure
+			if(pressure_ratio > 0 && pressure_ratio < 1e40)
+				var/compression_work = removed.total_moles() * R_IDEAL_GAS_EQUATION * temperature * log(pressure_ratio)
+				if(compression_work > 0)
+					return compression_work
+
 		return TRUE
 	return FALSE
 

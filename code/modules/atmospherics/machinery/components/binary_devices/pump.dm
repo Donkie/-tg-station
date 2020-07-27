@@ -58,7 +58,12 @@
 	var/datum/gas_mixture/air1 = airs[1]
 	var/datum/gas_mixture/air2 = airs[2]
 
-	if(air1.pump_gas_to(air2, target_pressure))
+	var/energy_used = air1.pump_gas_to(air2, target_pressure)
+	if(energy_used > 0)
+		if(energy_used != 1)
+			var/area/A = get_area(src)
+			to_chat(GLOB.admins, "<span class='warning'>[src] in [A] consuming [siunit(energy_used, "J", 2)] of energy</span>")
+			use_power(energy_used / GLOB.CELLRATE)
 		update_parents()
 
 //Radio remote control
