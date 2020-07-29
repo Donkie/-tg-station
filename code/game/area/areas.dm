@@ -532,12 +532,16 @@ GLOBAL_LIST_EMPTY(teleportlocs)
 		power_usage[i] = 0
 
 /**
-  * Add a power value amount to the stored used_x variables
+  * Consumes energy from the area's APC
+  *
+  * Arguments:
+  * * energy: The energy to consume, in joules.
+  * * chan: The channel which the energy will be drawn from. Any of the AREA_USAGE_* consts. Defaults to the power_channel of the machine.
   */
-/area/proc/use_energy(amount, chan)
+/area/proc/use_energy(energy, chan)
 	switch(chan)
 		if(AREA_USAGE_DYNAMIC_START to AREA_USAGE_DYNAMIC_END)
-			power_usage[chan] += amount
+			power_usage[chan] += energy
 
 
 /**
