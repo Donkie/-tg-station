@@ -534,7 +534,7 @@ GLOBAL_LIST_EMPTY(teleportlocs)
 /**
   * Add a power value amount to the stored used_x variables
   */
-/area/proc/use_power(amount, chan)
+/area/proc/use_energy(amount, chan)
 	switch(chan)
 		if(AREA_USAGE_DYNAMIC_START to AREA_USAGE_DYNAMIC_END)
 			power_usage[chan] += amount

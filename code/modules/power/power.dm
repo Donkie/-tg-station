@@ -92,14 +92,20 @@
 		chan = power_channel
 	return A.powered(chan)	// return power status of the area
 
-// increment the power usage stats for an area
-/obj/machinery/proc/use_power(amount, chan = -1) // defaults to power_channel
+/**
+  * Consumes energy from the area's APC
+  *
+  * Arguments:
+  * * energy: The energy to consume, in joules.
+  * * chan: The channel which the energy will be drawn from. Any of the AREA_USAGE_* consts. Defaults to the power_channel of the machine.
+  */
+/obj/machinery/proc/use_energy(energy, chan = -1) // defaults to power_channel
 	var/area/A = get_area(src)		// make sure it's in an area
 	if(!A)
 		return
 	if(chan == -1)
 		chan = power_channel
-	A.use_power(amount, chan)
+	A.use_energy(energy, chan)
 
 /obj/machinery/proc/addStaticPower(value, powerchannel)
 	var/area/A = get_area(src)
