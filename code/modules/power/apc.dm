@@ -38,6 +38,8 @@
 #define APC_CHARGING 1
 #define APC_FULLY_CHARGED 2
 
+#define APC_CHARGEDELAY 10 // How many process ticks to wait before we actually start to charge the APC after the grid is capable of charging it
+
 // the Area Power Controller (APC), formerly Power Distribution Unit (PDU)
 // one per area, needs wire connection to power network through a terminal
 
@@ -73,7 +75,7 @@
 	var/operating = TRUE
 	var/charging = APC_NOT_CHARGING
 	var/chargemode = 1
-	var/chargecount = 0
+	var/charge_delaytick = 0
 	var/locked = TRUE
 	var/coverlocked = TRUE
 	var/aidisabled = 0
@@ -560,7 +562,7 @@
 			cell = W
 			user.visible_message("<span class='notice'>[user.name] inserts the power cell to [src.name]!</span>",\
 				"<span class='notice'>You insert the power cell.</span>")
-			chargecount = 0
+			charge_delaytick = 0
 			update_icon()
 	else if (W.GetID())
 		togglelock(user)
@@ -636,7 +638,7 @@
 			var/obj/item/stock_parts/cell/crap/empty/C = new(src)
 			C.forceMove(src)
 			cell = C
-			chargecount = 0
+			charge_delaytick = 0
 			user.visible_message("<span class='notice'>[user] fabricates a weak power cell and places it into [src].</span>", \
 			"<span class='warning'>Your [P.name] whirrs with strain as you create a weak power cell and place it into [src]!</span>")
 			update_icon()
@@ -711,7 +713,7 @@
 				var/obj/item/stock_parts/cell/crap/empty/C = new(src)
 				C.forceMove(src)
 				cell = C
-				chargecount = 0
+				charge_delaytick = 0
 				user.visible_message("<span class='notice'>[user] fabricates a weak power cell and places it into [src].</span>", \
 				"<span class='warning'>Your [the_rcd.name] whirrs with strain as you create a weak power cell and place it into [src]!</span>")
 				update_icon()
@@ -1220,110 +1222,93 @@
 		main_status = 2
 
 	if(cell && !shorted)
-		// draw power from cell as before to power the area
-		//var/cellused = min(cell.charge, lastused_total)	// clamp deduction to a max, amount left in cell
-		//cell.use(cellused)
-
+		/*
+		Drain the grid and/or inserted cell
+		*/
 		if(grid_excess >= used_power)
 			// The grid has the necessary power for this load
 			add_load(used_power) // Apply the load on the grid
 			grid_excess -= used_power
-		else if((cell.charge / delta_time + grid_excess) >= used_power)
-			// The grid alone might not have enough power, but the grid + cell does
-			// Draw as much as possible from the grid
-			if(grid_excess > 0)
-				add_load(grid_excess)
-				grid_excess = 0
-
-			// Then draw the rest from the cell
-			cell.use((used_power - grid_excess) * delta_time)
 		else
-			// The grid nor the cell has enough juice to power the stuff
-			// Use up the remaining power on the grid and in the cell
+			// The grid does not have enough power for this load
+			// Draw as much as possible from the grid first
 			if(grid_excess > 0)
 				add_load(grid_excess)
 				grid_excess = 0
-			cell.use(cell.charge)
+			// Then draw the rest from the cell, or as much as possible
+			if(cell.charge > 0)
+				cell.use(min(cell.charge, (used_power - grid_excess) * delta_time))
 
-			chargecount = 0
-			// This turns everything off in the case that there is still a charge left on the battery, just not enough to run the room.
-			equipment = autoset(equipment, 0)
-			lighting = autoset(lighting, 0)
-			environ = autoset(environ, 0)
-
-
+		/*
+		Cell recharging logic
+		*/
 		if(cell.charge < cell.maxcharge)
+			// Cell is not fully charged, try to recharge it
+
 			if(chargemode && operating && grid_excess > 0)
-				// Charging energy [J]
-				var/ch = min(grid_excess * delta_time, cell.maxcharge * GLOB.CHARGELEVEL)
+				// We want to charge it and the grid is capable of charging it
 
-				// Load the grid with the power equivalent of the charging energy
-				add_load(ch / delta_time)
+				// Introduce a charging delay to prevent flicking the charging on and off repeatedly
+				if(charge_delaytick >= APC_CHARGEDELAY)
+					// Charging energy [J]
+					var/ch = min(grid_excess * delta_time, cell.maxcharge * GLOB.CHARGELEVEL)
 
-				cell.give(ch)
+					// Load the grid with the power equivalent of the charging energy
+					add_load(ch / delta_time)
 
-				charging = APC_CHARGING
+					cell.give(ch)
+
+					charging = APC_CHARGING
+				else
+					charge_delaytick++
 			else
-				chargecount = 0
+				charge_delaytick = 0
 				charging = APC_NOT_CHARGING
 		else
+			charge_delaytick = 0
 			charging = APC_FULLY_CHARGED
 
-
-
-
-
-		// set channels depending on how much charge we have left
-
-		// Allow the APC to operate as normal if the cell can charge
+		// longtermpower is used to immediately turn all channels back on once we have a stable charging current
+		// It increases to 10 while we're charging, and decreases to -10 while we're not charging
 		if(charging && longtermpower < 10)
 			longtermpower += 1
 		else if(longtermpower > -10)
 			longtermpower -= 2
 
-		if(cell.charge <= 0)					// zero charge, turn all off
+		/*
+		Set channels depending on how much charge we have left
+		*/
+		var/cellpercent = cell.percent()
+		if(cell.charge <= 0)
+			// zero charge, turn all off
 			equipment = autoset(equipment, 0)
 			lighting = autoset(lighting, 0)
 			environ = autoset(environ, 0)
 			area.poweralert(0, src)
-		else if(cell.percent() < 15 && longtermpower < 0)	// <15%, turn off lighting & equipment
+		else if(cell.percent() < 15 && longtermpower < 0)
+			// <15%, turn off lighting & equipment
 			equipment = autoset(equipment, 2)
 			lighting = autoset(lighting, 2)
 			environ = autoset(environ, 1)
 			area.poweralert(0, src)
-		else if(cell.percent() < 30 && longtermpower < 0)			// <30%, turn off equipment
+		else if(cell.percent() < 30 && longtermpower < 0)
+			// <30%, turn off equipment
 			equipment = autoset(equipment, 2)
 			lighting = autoset(lighting, 1)
 			environ = autoset(environ, 1)
 			area.poweralert(0, src)
-		else									// otherwise all can be on
+		else
+			// otherwise all can be on
 			equipment = autoset(equipment, 1)
 			lighting = autoset(lighting, 1)
 			environ = autoset(environ, 1)
 			area.poweralert(1, src)
 			if(cell.percent() > 75)
 				area.poweralert(1, src)
-
-		if(chargemode)
-			if(!charging)
-				if(grid_excess > cell.maxcharge*GLOB.CHARGELEVEL)
-					chargecount++
-				else
-					chargecount = 0
-
-				if(chargecount == 10)
-
-					chargecount = 0
-					charging = APC_CHARGING
-
-		else // chargemode off
-			charging = 0
-			chargecount = 0
-
-	else // no cell, switch everything off
-
+	else
+		// no cell, switch everything off
 		charging = APC_NOT_CHARGING
-		chargecount = 0
+		charge_delaytick = 0
 		equipment = autoset(equipment, 0)
 		lighting = autoset(lighting, 0)
 		environ = autoset(environ, 0)
