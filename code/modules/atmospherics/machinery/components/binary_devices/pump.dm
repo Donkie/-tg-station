@@ -63,7 +63,7 @@
 		if(energy_used != 1)
 			var/area/A = get_area(src)
 			to_chat(GLOB.admins, "<span class='warning'>[src] in [A] consuming [siunit(energy_used, "J", 2)] of energy</span>")
-			use_power(energy_used / GLOB.CELLRATE)
+			use_power(energy_used * GLOB.CELLRATE)
 		update_parents()
 
 //Radio remote control
