@@ -58,6 +58,7 @@
 	resistance_flags = FIRE_PROOF
 	interaction_flags_machine = INTERACT_MACHINE_WIRES_IF_OPEN | INTERACT_MACHINE_ALLOW_SILICON | INTERACT_MACHINE_OPEN_SILICON
 
+	var/static/delta_time = null // Seconds between each process call
 	var/lon_range = 1.5
 	var/area/area
 	var/areastring = null
@@ -156,6 +157,11 @@
 		armor = list("melee" = 20, "bullet" = 20, "laser" = 10, "energy" = 100, "bomb" = 30, "bio" = 100, "rad" = 100, "fire" = 90, "acid" = 50)
 	..()
 	GLOB.apcs_list += src
+
+	// Find the wait delay from the subsystem
+	if(!delta_time)
+		var/datum/controller/subsystem/processing/subsystem = locate(subsystem_type) in Master.subsystems
+		delta_time = subsystem.wait / 10 // To seconds
 
 	wires = new /datum/wires/apc(src)
 	// offset 24 pixels in direction of dir
@@ -1185,12 +1191,17 @@
 		force_update = 1
 		return
 
-	lastused_light = area.power_usage[AREA_USAGE_LIGHT] + area.power_usage[AREA_USAGE_STATIC_LIGHT]
-	lastused_equip = area.power_usage[AREA_USAGE_EQUIP] + area.power_usage[AREA_USAGE_STATIC_EQUIP]
-	lastused_environ = area.power_usage[AREA_USAGE_ENVIRON] + area.power_usage[AREA_USAGE_STATIC_ENVIRON]
+	// Consumed energy this tick [J]
+	lastused_light = area.electricity_usage[AREA_USAGE_LIGHT] + area.electricity_usage[AREA_USAGE_STATIC_LIGHT] * delta_time
+	lastused_equip = area.electricity_usage[AREA_USAGE_EQUIP] + area.electricity_usage[AREA_USAGE_STATIC_EQUIP] * delta_time
+	lastused_environ = area.electricity_usage[AREA_USAGE_ENVIRON] + area.electricity_usage[AREA_USAGE_STATIC_ENVIRON] * delta_time
 	area.clear_usage()
 
+	// Total consumed energy this tick [J]
 	lastused_total = lastused_light + lastused_equip + lastused_environ
+
+	// Equivalent power usage this tick [W]
+	var/used_power = lastused_total / delta_time
 
 	//store states to update icon if any change
 	var/last_lt = lighting
@@ -1198,39 +1209,68 @@
 	var/last_en = environ
 	var/last_ch = charging
 
-	var/excess = surplus()
+	// Surplus power available in the grid [W]
+	var/grid_excess = surplus()
 
-	if(!src.avail())
+	if(!avail())
 		main_status = 0
-	else if(excess < 0)
+	else if(grid_excess < 0)
 		main_status = 1
 	else
 		main_status = 2
 
 	if(cell && !shorted)
 		// draw power from cell as before to power the area
-		var/cellused = min(cell.charge, GLOB.CELLRATE * lastused_total)	// clamp deduction to a max, amount left in cell
-		cell.use(cellused)
+		//var/cellused = min(cell.charge, lastused_total)	// clamp deduction to a max, amount left in cell
+		//cell.use(cellused)
 
-		if(excess > lastused_total)		// if power excess recharge the cell
-										// by the same amount just used
-			cell.give(cellused)
-			add_load(cellused/GLOB.CELLRATE)		// add the load used to recharge the cell
+		if(grid_excess >= used_power)
+			// The grid has the necessary power for this load
+			add_load(used_power) // Apply the load on the grid
+			grid_excess -= used_power
+		else if((cell.charge / delta_time + grid_excess) >= used_power)
+			// The grid alone might not have enough power, but the grid + cell does
+			// Draw as much as possible from the grid
+			if(grid_excess > 0)
+				add_load(grid_excess)
+				grid_excess = 0
+
+			// Then draw the rest from the cell
+			cell.use((used_power - grid_excess) * delta_time)
+		else
+			// The grid nor the cell has enough juice to power the stuff
+			// Use up the remaining power on the grid and in the cell
+			if(grid_excess > 0)
+				add_load(grid_excess)
+				grid_excess = 0
+			cell.use(cell.charge)
+
+			chargecount = 0
+			// This turns everything off in the case that there is still a charge left on the battery, just not enough to run the room.
+			equipment = autoset(equipment, 0)
+			lighting = autoset(lighting, 0)
+			environ = autoset(environ, 0)
 
 
-		else		// no excess, and not enough per-apc
-			if((cell.charge/GLOB.CELLRATE + excess) >= lastused_total)		// can we draw enough from cell+grid to cover last usage?
-				cell.charge = min(cell.maxcharge, cell.charge + GLOB.CELLRATE * excess)	//recharge with what we can
-				add_load(excess)		// so draw what we can from the grid
-				charging = APC_NOT_CHARGING
+		if(cell.charge < cell.maxcharge)
+			if(chargemode && operating && grid_excess > 0)
+				// Charging energy [J]
+				var/ch = min(grid_excess * delta_time, cell.maxcharge * GLOB.CHARGELEVEL)
 
-			else	// not enough power available to run the last tick!
-				charging = APC_NOT_CHARGING
+				// Load the grid with the power equivalent of the charging energy
+				add_load(ch / delta_time)
+
+				cell.give(ch)
+
+				charging = APC_CHARGING
+			else
 				chargecount = 0
-				// This turns everything off in the case that there is still a charge left on the battery, just not enough to run the room.
-				equipment = autoset(equipment, 0)
-				lighting = autoset(lighting, 0)
-				environ = autoset(environ, 0)
+				charging = APC_NOT_CHARGING
+		else
+			charging = APC_FULLY_CHARGED
+
+
+
 
 
 		// set channels depending on how much charge we have left
@@ -1264,26 +1304,9 @@
 			if(cell.percent() > 75)
 				area.poweralert(1, src)
 
-		// now trickle-charge the cell
-		if(chargemode && charging == APC_CHARGING && operating)
-			if(excess > 0)		// check to make sure we have enough to charge
-				// Max charge is capped to % per second constant
-				var/ch = min(excess*GLOB.CELLRATE, cell.maxcharge*GLOB.CHARGELEVEL)
-				add_load(ch/GLOB.CELLRATE) // Removes the power we're taking from the grid
-				cell.give(ch) // actually recharge the cell
-
-			else
-				charging = APC_NOT_CHARGING		// stop charging
-				chargecount = 0
-
-		// show cell as fully charged if so
-		if(cell.charge >= cell.maxcharge)
-			cell.charge = cell.maxcharge
-			charging = APC_FULLY_CHARGED
-
 		if(chargemode)
 			if(!charging)
-				if(excess > cell.maxcharge*GLOB.CHARGELEVEL)
+				if(grid_excess > cell.maxcharge*GLOB.CHARGELEVEL)
 					chargecount++
 				else
 					chargecount = 0
