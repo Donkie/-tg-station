@@ -9,7 +9,7 @@
 	desc = "An exosuit module that allows exosuits to teleport to any position in view."
 	icon_state = "mecha_teleport"
 	equip_cooldown = 150
-	energy_drain = 1000
+	energy_drain = 1e6
 	range = MECHA_RANGED
 	var/teleport_range = 7
 
@@ -31,7 +31,7 @@
 	desc = "An exosuit module that allows generating of small quasi-stable wormholes, allowing for long-range inneacurate teleportation."
 	icon_state = "mecha_wholegen"
 	equip_cooldown = 50
-	energy_drain = 300
+	energy_drain = 300e3
 	range = MECHA_RANGED
 
 
@@ -73,7 +73,7 @@
 	desc = "An exosuit mounted Gravitational Catapult."
 	icon_state = "mecha_teleport"
 	equip_cooldown = 10
-	energy_drain = 100
+	energy_drain = 100e3
 	range = MECHA_MELEE|MECHA_RANGED
 	///Which atom we are movable_target onto for
 	var/atom/movable/movable_target
@@ -156,7 +156,7 @@
 	desc = "Boosts exosuit armor against armed melee attacks. Requires energy to operate."
 	icon_state = "mecha_abooster_ccw"
 	equip_cooldown = 10
-	energy_drain = 50
+	energy_drain = 50e3
 	range = 0
 	var/deflect_coeff = 1.15
 	var/damage_coeff = 0.8
@@ -175,7 +175,7 @@
 	desc = "Boosts exosuit armor against ranged attacks. Completely blocks taser shots. Requires energy to operate."
 	icon_state = "mecha_abooster_proj"
 	equip_cooldown = 10
-	energy_drain = 50
+	energy_drain = 50e3
 	range = 0
 	var/deflect_coeff = 1.15
 	var/damage_coeff = 0.8
@@ -195,7 +195,7 @@
 	name = "exosuit repair droid"
 	desc = "An automated repair droid for exosuits. Scans for damage and repairs it. Can fix almost all types of external or internal damage."
 	icon_state = "repair_droid"
-	energy_drain = 50
+	energy_drain = 50e3
 	range = 0
 
 	/// Repaired health per second
@@ -203,6 +203,8 @@
 	var/icon/droid_overlay
 	var/list/repairable_damage = list(MECHA_INT_TEMP_CONTROL,MECHA_INT_TANK_BREACH)
 	selectable = 0
+	/// Power consumption while repairing, in watts
+	var/power_consumption = 25e3
 
 /obj/item/mecha_parts/mecha_equipment/repair_droid/Destroy()
 	STOP_PROCESSING(SSobj, src)
@@ -257,7 +259,7 @@
 		chassis.obj_integrity += min(h_boost, chassis.max_integrity-chassis.obj_integrity)
 		repaired = TRUE
 	if(repaired)
-		if(!chassis.use_power(energy_drain))
+		if(!chassis.use_energy(delta_time * power_consumption))
 			return PROCESS_KILL
 	else //no repair needed, we turn off
 		chassis.cut_overlay(droid_overlay)
@@ -270,13 +272,17 @@
 
 /////////////////////////////////// TESLA ENERGY RELAY ////////////////////////////////////////////////
 
+/// Charging efficiency
+#define MECHA_TESLA_CHARGEEFF 0.01
+/// Charging power, in watts (how much power the cell receives)
+#define MECHA_TESLA_CHARGEPOWER 10e3
+
 /obj/item/mecha_parts/mecha_equipment/tesla_energy_relay
 	name = "exosuit energy relay"
 	desc = "An exosuit module that wirelessly drains energy from any available power channel in area. The performance index is quite low."
 	icon_state = "tesla"
 	energy_drain = 0
 	range = 0
-	var/coeff = 100
 	var/list/use_channels = list(AREA_USAGE_EQUIP,AREA_USAGE_ENVIRON,AREA_USAGE_LIGHT)
 	selectable = FALSE
 
@@ -293,7 +299,7 @@
 		return
 	var/pow_chan = get_chassis_area_power(get_area(chassis))
 	if(pow_chan)
-		return 1000 //making magic
+		return 1e6 //making magic
 
 
 /obj/item/mecha_parts/mecha_equipment/tesla_energy_relay/proc/get_chassis_area_power(area/A)
@@ -335,9 +341,8 @@
 	var/area/A = get_area(chassis)
 	var/pow_chan = get_chassis_area_power(A)
 	if(pow_chan)
-		var/delta = min(10 * delta_time, chassis.cell.maxcharge-cur_charge)
-		chassis.give_power(delta)
-		A.use_power(delta*coeff, pow_chan)
+		var/charged_energy = chassis.give_energy(MECHA_TESLA_CHARGEPOWER * delta_time)
+		A.use_energy(charged_energy / MECHA_TESLA_CHARGEEFF, pow_chan)
 
 
 
@@ -350,15 +355,14 @@
 	desc = "An exosuit module that generates power using solid plasma as fuel. Pollutes the environment."
 	icon_state = "tesla"
 	range = MECHA_MELEE
-	var/coeff = 100
 	var/obj/item/stack/sheet/fuel
 	var/max_fuel = 150000
 	/// Fuel used per second while idle, not generating
 	var/fuelrate_idle = 12.5
 	/// Fuel used per second while actively generating
 	var/fuelrate_active = 100
-	/// Energy recharged per second
-	var/rechargerate = 10
+	/// Recharge rate, in watts
+	var/rechargerate = 10e3
 
 /obj/item/mecha_parts/mecha_equipment/generator/Initialize()
 	. = ..()
@@ -431,7 +435,7 @@
 	var/use_fuel = fuelrate_idle
 	if(cur_charge < chassis.cell.maxcharge)
 		use_fuel = fuelrate_active
-		chassis.give_power(rechargerate * delta_time)
+		chassis.give_energy(rechargerate * delta_time)
 	fuel.amount -= min(delta_time * use_fuel / MINERAL_MATERIAL_AMOUNT, fuel.amount)
 	update_equip_info()
 
@@ -443,7 +447,7 @@
 	max_fuel = 50000
 	fuelrate_idle = 5
 	fuelrate_active = 15
-	rechargerate = 25
+	rechargerate = 25e3
 	var/radrate = 15
 
 /obj/item/mecha_parts/mecha_equipment/generator/nuclear/generator_init()
@@ -560,7 +564,7 @@
 /obj/item/mecha_parts/mecha_equipment/thrusters/ion/thrust(movement_dir)
 	if(!chassis)
 		return FALSE
-	if(chassis.use_power(chassis.step_energy_drain))
+	if(chassis.use_energy(chassis.step_energy_drain))
 		generate_effect(movement_dir)
 		return TRUE
 	return FALSE

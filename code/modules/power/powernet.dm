@@ -2,100 +2,141 @@
 // POWERNET DATUM
 // each contiguous network of cables & nodes
 /////////////////////////////////////
+
+/// Minimum excess power needed to start charging SMES units
+#define POWERNET_MINEXCESSFORSMES 100
+
 /datum/powernet
 	var/number					// unique id
 	var/list/cables = list()	// all cables & junctions
 	var/list/nodes = list()		// all connected machines
 
-	var/load = 0				// the current load on the powernet, increased by each machine at processing
-	var/newavail = 0			// what available power was gathered last tick, then becomes...
-	var/avail = 0				//...the current available power in the powernet
-	var/viewavail = 0			// the available power as it appears on the power console (gradually updated)
-	var/viewload = 0			// the load as it appears on the power console (gradually updated)
-	var/netexcess = 0			// excess power on the powernet (typically avail-load)///////
-	var/delayedload = 0			// load applied to powernet between power ticks.
+	/// The current load on the powernet, in watts. Increased by each machine at processing.
+	var/load = 0
+
+	/// Supplied power to the powernet this cycle, in watts. Will be used to power stuff the next cycle. Increased by generators.
+	var/newavail = 0
+
+	/// Supplied power to the powernet last cycle, in watts. This is the power that is used to power stuff this cycle.
+	var/avail = 0
+
+	/// Smoothed version of `avail`, in watts. For displaying to players.
+	var/viewavail = 0
+
+	/// Smoothed version of `load`, in watts. For displaying to players.
+	var/viewload = 0
+
+	/// Excess power on the powernet this cycle, in watts. Used for charging SMES units.
+	var/netexcess = 0
+
+	/// Non-machinery load applied to the powernet, in watts.
+	var/delayedload = 0
 
 /datum/powernet/New()
 	SSmachines.powernets += src
 
 /datum/powernet/Destroy()
-	//Go away references, you suck!
-	for(var/obj/structure/cable/C in cables)
-		cables -= C
-		C.powernet = null
-	for(var/obj/machinery/power/M in nodes)
-		nodes -= M
-		M.powernet = null
+	//Clean up references
+	for(var/obj/structure/cable/the_cable in cables)
+		cables -= the_cable
+		the_cable.powernet = null
+
+	for(var/obj/machinery/power/machine in nodes)
+		nodes -= machine
+		machine.powernet = null
 
 	SSmachines.powernets -= src
 	return ..()
 
+/**
+  * Returns TRUE if this powernet contains no cables and no machinery
+  */
 /datum/powernet/proc/is_empty()
 	return !cables.len && !nodes.len
 
-//remove a cable from the current powernet
-//if the powernet is then empty, delete it
-//Warning : this proc DON'T check if the cable exists
-/datum/powernet/proc/remove_cable(obj/structure/cable/C)
-	cables -= C
-	C.powernet = null
-	if(is_empty())//the powernet is now empty...
-		qdel(src)///... delete it
+/**
+  * Remove a cable from the powernet. Assumes that the cable exists.
+  *
+  * If this resulted in the powernet being empty, the powernet is removed.
+  */
+/datum/powernet/proc/remove_cable(obj/structure/cable/the_cable)
+	cables -= the_cable
+	the_cable.powernet = null
 
-//add a cable to the current powernet
-//Warning : this proc DON'T check if the cable exists
-/datum/powernet/proc/add_cable(obj/structure/cable/C)
-	if(C.powernet)// if C already has a powernet...
-		if(C.powernet == src)
+	// Delete the powernet if it's empty
+	if(is_empty())
+		qdel(src)
+
+/**
+  * Add a cable to the powernet. Assumes that the cable exists.
+  */
+/datum/powernet/proc/add_cable(obj/structure/cable/the_cable)
+	// Remove the cable from the previous powernet if it had one.
+	if(the_cable.powernet)
+		if(the_cable.powernet == src)
 			return
 		else
-			C.powernet.remove_cable(C) //..remove it
-	C.powernet = src
-	cables +=C
+			the_cable.powernet.remove_cable(the_cable)
 
-//remove a power machine from the current powernet
-//if the powernet is then empty, delete it
-//Warning : this proc DON'T check if the machine exists
-/datum/powernet/proc/remove_machine(obj/machinery/power/M)
-	nodes -=M
-	M.powernet = null
-	if(is_empty())//the powernet is now empty...
-		qdel(src)///... delete it
+	the_cable.powernet = src
+	cables += the_cable
 
+/**
+  * Remove a power machine from the powernet. Assumes that the machine exists.
+  *
+  * If this resulted in the powernet being empty, the powernet is removed.
+  */
+/datum/powernet/proc/remove_machine(obj/machinery/power/machine)
+	nodes -= machine
+	machine.powernet = null
 
-//add a power machine to the current powernet
-//Warning : this proc DON'T check if the machine exists
-/datum/powernet/proc/add_machine(obj/machinery/power/M)
-	if(M.powernet)// if M already has a powernet...
-		if(M.powernet == src)
+	// Delete the powernet if it's empty
+	if(is_empty())
+		qdel(src)
+
+/**
+  * Add a power machine to the powernet. Assumes that the machine exists.
+  */
+/datum/powernet/proc/add_machine(obj/machinery/power/machine)
+	// Remove the machine from the previous powernet if it had one.
+	if(machine.powernet)
+		if(machine.powernet == src)
 			return
 		else
-			M.disconnect_from_network()//..remove it
-	M.powernet = src
-	nodes[M] = M
+			machine.disconnect_from_network()
 
-//handles the power changes in the powernet
-//called every ticks by the powernet controller
-/datum/powernet/proc/reset()
-	//see if there's a surplus of power remaining in the powernet and stores unused power in the SMES
+	machine.powernet = src
+	nodes[machine] = machine
+
+/**
+  * Handles the power changes in the powernet. Called every cycle by SSmachines, before all machines get processed.
+  */
+/datum/powernet/proc/reset(delta_time)
+	// Calculate surplus power in the powernet
 	netexcess = avail - load
 
-	if(netexcess > 100 && nodes?.len)		// if there was excess power last cycle
-		for(var/obj/machinery/power/smes/S in nodes)	// find the SMESes in the network
-			S.restore()				// and restore some of the power that was used
+	// Tell SMES units to charge up if we have enough excess
+	if(netexcess > POWERNET_MINEXCESSFORSMES && nodes?.len)
+		for(var/obj/machinery/power/smes/the_smes in nodes)
+			the_smes.restore(delta_time)
 
-	// update power consoles
-	viewavail = round(0.8 * viewavail + 0.2 * avail)
-	viewload = round(0.8 * viewload + 0.2 * load)
+	// Update smoothed values
+	viewavail = LPFILTER(viewavail, avail, delta_time, 8)
+	viewload = LPFILTER(viewload, load, delta_time, 8)
 
-	// reset the powernet
+	// Reset the powernet
 	load = delayedload
 	delayedload = 0
 	avail = newavail
 	newavail = 0
 
+/**
+  * Returns how much damage getting electrocuted by something attached to this powernet should cause.
+  */
 /datum/powernet/proc/get_electrocute_damage()
 	if(avail >= 1000)
 		return clamp(20 + round(avail/25000), 20, 195) + rand(-5,5)
 	else
 		return 0
+
+#undef POWERNET_MINEXCESSFORSMES

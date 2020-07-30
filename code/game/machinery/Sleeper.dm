@@ -289,7 +289,7 @@
 	name = "party pod"
 	desc = "'Sleeper' units were once known for their healing properties, until a lengthy investigation revealed they were also dosing patients with deadly lead acetate. This appears to be one of those old 'sleeper' units repurposed as a 'Party Pod'. It’s probably not a good idea to use it."
 	icon_state = "partypod"
-	idle_power_usage = 3000
+	idle_power_usage = 1500
 	circuit = /obj/item/circuitboard/machine/sleeper/party
 	var/leddit = FALSE //Get it like reddit and lead alright fine
 

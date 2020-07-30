@@ -146,11 +146,10 @@
 /obj/machinery/power/rad_collector/examine(mob/user)
 	. = ..()
 	if(active)
-		// stored_energy is converted directly to watts every SSmachines.wait * 0.1 seconds.
-		// Therefore, its units are joules per SSmachines.wait * 0.1 seconds.
-		// So joules = stored_energy * SSmachines.wait * 0.1
-		var/joules = stored_energy * SSmachines.wait * 0.1
-		. += "<span class='notice'>[src]'s display states that it has stored <b>[DisplayJoules(joules)]</b>, and is processing <b>[DisplayPower(RAD_COLLECTOR_OUTPUT)]</b>.</span>"
+		// stored_energy is converted directly to watts every SSMACHINES_DT seconds.
+		// Therefore, its units are joules per SSMACHINES_DT seconds.
+		var/joules = stored_energy * SSMACHINES_DT
+		. += "<span class='notice'>[src]'s display states that it has stored <b>[siunit(joules, "J", 1)]</b>, and is processing at <b>[siunit(RAD_COLLECTOR_OUTPUT, "W", 1)]</b>.</span>"
 	else
 		. += "<span class='notice'><b>[src]'s display displays the words:</b> \"Power production mode. Please insert <b>Plasma</b>.\"</span>"
 

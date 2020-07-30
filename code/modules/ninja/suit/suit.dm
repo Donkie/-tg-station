@@ -42,10 +42,10 @@
 	var/s_initialized = FALSE//Suit starts off.
 	///The suit's current cooldown.  If not 0, blocks usage of most abilities, and decrements its value by 1 every process
 	var/s_coold = 0
-	///How much energy the suit expends in a single process
-	var/s_cost = 1
-	///Additional energy cost for cloaking per process
-	var/s_acost = 4
+	///Power consumption of the suit, in watts
+	var/s_cost = 0.5e3
+	///Additional power consumption for cloaking, in watts
+	var/s_acost = 2e3
 	///How fast the suit is at certain actions, like draining power from things
 	var/s_delay = 40
 	///Units of radium required to refill the adrenaline boost
@@ -63,7 +63,7 @@
 		return
 	if(!user == affecting)
 		return
-	. += "All systems operational. Current energy capacity: <B>[DisplayEnergy(cell.charge)]</B>.\n"+\
+	. += "All systems operational. Current energy capacity: <B>[siunit(cell.charge, "J", 1)]</B>.\n"+\
 	"The CLOAK-tech device is <B>[stealth?"active":"inactive"]</B>.\n"+\
 	"[a_boost?"An adrenaline boost is available to use.":"There is no adrenaline boost available.  Try refilling the suit with 20 units of radium."]"
 
@@ -80,7 +80,7 @@
 
 	//Cell Init
 	cell = new/obj/item/stock_parts/cell/high
-	cell.charge = 9000
+	cell.charge = 9e6
 	cell.name = "black power cell"
 	cell.icon_state = "bscell"
 

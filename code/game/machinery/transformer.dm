@@ -12,7 +12,7 @@
 	var/cooldown_duration = 600 // 1 minute
 	var/cooldown = 0
 	var/cooldown_timer
-	var/robot_cell_charge = 5000
+	var/robot_cell_charge = 5e6
 	var/obj/effect/countdown/transformer/countdown
 	var/mob/living/silicon/ai/masterAI
 
@@ -90,7 +90,7 @@
 	// Sleep for a couple of ticks to allow the human to see the pain
 	sleep(5)
 
-	use_power(5000) // Use a lot of power.
+	use_energy(5000)
 	var/mob/living/silicon/robot/R = H.Robotize()
 	R.cell = new /obj/item/stock_parts/cell/upgraded/plus(R, robot_cell_charge)
 

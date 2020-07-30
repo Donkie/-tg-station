@@ -11,8 +11,8 @@
 	icon_state = "limbgrower_idleoff"
 	density = TRUE
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 10
-	active_power_usage = 100
+	idle_power_usage = 5
+	active_power_usage = 50
 	circuit = /obj/item/circuitboard/machine/limbgrower
 
 	var/operating = FALSE
@@ -99,11 +99,11 @@
 
 
 			var/synth_cost = being_built.reagents_list[/datum/reagent/medicine/c2/synthflesh]*prod_coeff
-			var/power = max(2000, synth_cost/5)
+			var/energy = max(2000, synth_cost/5)
 
 			if(reagents.has_reagent(/datum/reagent/medicine/c2/synthflesh, being_built.reagents_list[/datum/reagent/medicine/c2/synthflesh]*prod_coeff))
 				busy = TRUE
-				use_power(power)
+				use_energy(energy)
 				flick("limbgrower_fill",src)
 				icon_state = "limbgrower_idleon"
 				addtimer(CALLBACK(src, .proc/build_item),32*prod_coeff)

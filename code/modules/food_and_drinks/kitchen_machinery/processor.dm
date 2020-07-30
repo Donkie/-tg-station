@@ -7,8 +7,8 @@
 	layer = BELOW_OBJ_LAYER
 	density = TRUE
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 5
-	active_power_usage = 50
+	idle_power_usage = 2
+	active_power_usage = 25
 	circuit = /obj/item/circuitboard/machine/processor
 	var/broken = FALSE
 	var/processing = FALSE
@@ -113,7 +113,7 @@
 		"<span class='notice'>You turn on [src].</span>", \
 		"<span class='hear'>You hear a food processor.</span>")
 	playsound(src.loc, 'sound/machines/blender.ogg', 50, TRUE)
-	use_power(500)
+	use_energy(500)
 	var/total_time = 0
 	for(var/O in processor_contents)
 		var/datum/food_processor_process/P = select_recipe(O)

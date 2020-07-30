@@ -1,3 +1,9 @@
+
+/// Charging power for the internal cell, in watts
+#define DEFIBMOUNT_CHARGEPOWER 40e3
+/// Efficiency of the cell charging
+#define DEFIBMOUNT_CHARGEEFF 0.8
+
 //Holds defibs does NOT recharge them
 //You can activate the mount with an empty hand to grab the paddles
 //Not being adjacent will cause the paddles to snap back
@@ -198,9 +204,11 @@
 	if(!C || !is_operational)
 		return PROCESS_KILL
 	if(C.charge < C.maxcharge)
-		use_power(50 * delta_time)
-		C.give(40 * delta_time)
+		use_energy(C.give(DEFIBMOUNT_CHARGEPOWER * delta_time) / DEFIBMOUNT_CHARGEEFF)
 		update_icon()
+
+#undef DEFIBMOUNT_CHARGEPOWER
+#undef DEFIBMOUNT_CHARGEEFF
 
 //wallframe, for attaching the mounts easily
 /obj/item/wallframe/defib_mount

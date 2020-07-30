@@ -2,7 +2,7 @@
 //
 // consists of light fixtures (/obj/machinery/light) and light tube/bulb items (/obj/item/light)
 
-#define LIGHT_EMERGENCY_POWER_USE 0.2 //How much power emergency lights will consume per tick
+#define LIGHT_EMERGENCY_POWER_USE 100 // How much power emergency lights will consume, in watts
 // status values shared between lighting fixtures and items
 #define LIGHT_OK 0
 #define LIGHT_EMPTY 1
@@ -219,8 +219,8 @@
 	layer = WALL_OBJ_LAYER
 	max_integrity = 100
 	use_power = ACTIVE_POWER_USE
-	idle_power_usage = 2
-	active_power_usage = 20
+	idle_power_usage = 1
+	active_power_usage = 10
 	power_channel = AREA_USAGE_LIGHT //Lights are calc'd via area so they dont need to be in the machine list
 	var/on = FALSE					// 1 if on, 0 if off
 	var/on_gs = FALSE
@@ -451,14 +451,14 @@
 		set_light(0)
 	update_icon()
 
-	active_power_usage = (brightness * 10)
+	active_power_usage = (brightness * 5)
 	if(on != on_gs)
 		on_gs = on
 		if(on)
-			static_power_used = brightness * 20 //20W per unit luminosity
-			addStaticPower(static_power_used, AREA_USAGE_STATIC_LIGHT)
+			static_power_used = brightness * 10 //10W per unit luminosity
+			add_power_load(static_power_used, AREA_USAGE_LIGHT)
 		else
-			removeStaticPower(static_power_used, AREA_USAGE_STATIC_LIGHT)
+			remove_power_load(static_power_used, AREA_USAGE_LIGHT)
 
 	broken_sparks(start_only=TRUE)
 
@@ -473,14 +473,14 @@
 		var/delay = rand(BROKEN_SPARKS_MIN, BROKEN_SPARKS_MAX)
 		addtimer(CALLBACK(src, .proc/broken_sparks), delay, TIMER_UNIQUE | TIMER_NO_HASH_WAIT)
 
-/obj/machinery/light/process()
-	if (!cell)
+/obj/machinery/light/process(delta_time)
+	if(!cell)
 		return PROCESS_KILL
 	if(has_power())
-		if (cell.charge == cell.maxcharge)
+		if(cell.charge == cell.maxcharge)
 			return PROCESS_KILL
-		cell.charge = min(cell.maxcharge, cell.charge + LIGHT_EMERGENCY_POWER_USE) //Recharge emergency power automatically while not using it
-	if(emergency_mode && !use_emergency_power(LIGHT_EMERGENCY_POWER_USE))
+		cell.give(LIGHT_EMERGENCY_POWER_USE * delta_time) // Recharge emergency power automatically while not using it
+	if(emergency_mode && !use_emergency_power(LIGHT_EMERGENCY_POWER_USE * delta_time))
 		update(FALSE) //Disables emergency mode and sets the color to normal
 
 /obj/machinery/light/proc/burn_out()
@@ -645,21 +645,21 @@
 
 // returns whether this light has emergency power
 // can also return if it has access to a certain amount of that power
-/obj/machinery/light/proc/has_emergency_power(pwr)
+/obj/machinery/light/proc/has_emergency_power(energy)
 	if(no_emergency || !cell)
 		return FALSE
-	if(pwr ? cell.charge >= pwr : cell.charge)
+	if(energy ? cell.charge >= energy : cell.charge)
 		return status == LIGHT_OK
 
 // attempts to use power from the installed emergency cell, returns true if it does and false if it doesn't
-/obj/machinery/light/proc/use_emergency_power(pwr = LIGHT_EMERGENCY_POWER_USE)
-	if(!has_emergency_power(pwr))
+/obj/machinery/light/proc/use_emergency_power(energy)
+	if(!has_emergency_power(energy))
 		return FALSE
-	if(cell.charge > 300) //it's meant to handle 120 W, ya doofus
+	if(cell.charge > 300e3) //it's meant to handle 120 W, ya doofus
 		visible_message("<span class='warning'>[src] short-circuits from too powerful of a power cell!</span>")
 		burn_out()
 		return FALSE
-	cell.use(pwr)
+	cell.use(energy)
 	set_light(brightness * bulb_emergency_brightness_mul, max(bulb_emergency_pow_min, bulb_emergency_pow_mul * (cell.charge / cell.maxcharge)), bulb_emergency_colour)
 	return TRUE
 

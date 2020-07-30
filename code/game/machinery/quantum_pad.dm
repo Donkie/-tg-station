@@ -4,8 +4,8 @@
 	icon = 'icons/obj/telescience.dmi'
 	icon_state = "qpad-idle"
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 200
-	active_power_usage = 5000
+	idle_power_usage = 100
+	active_power_usage = 2500
 	obj_flags = CAN_BE_HIT | UNIQUE_RENAME
 	circuit = /obj/item/circuitboard/machine/quantumpad
 	var/teleport_cooldown = 400 //30 seconds base due to base parts
@@ -154,7 +154,7 @@
 			last_teleport = world.time
 
 			// use a lot of power
-			use_power(10000 / power_efficiency)
+			use_energy(10000 / power_efficiency)
 			sparks()
 			target_pad.sparks()
 

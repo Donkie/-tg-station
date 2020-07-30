@@ -64,7 +64,11 @@
 	///Typepath to limit the areas (subtypes included) that atoms in this area can smooth with. Used for shuttles.
 	var/area/area_limited_icon_smoothing
 
-	var/list/power_usage
+	/// Energy that was consumed from this area this cycle, in joules. Cleared at the end of each cycle by the APC's process. Used for instantaneous energy-draining actions.
+	var/list/energy_usage
+
+	/// Static power loads on this area, in watts. Used for machinery that draw a constant load on the grid.
+	var/list/power_load
 
 	/// Wire assignment for airlocks in this area
 	var/airlock_wires = /datum/wires/airlock
@@ -122,7 +126,11 @@ GLOBAL_LIST_EMPTY(teleportlocs)
 	// rather than waiting for atoms to initialize.
 	if (area_flags & UNIQUE_AREA)
 		GLOB.areas_by_type[type] = src
-	power_usage = new /list(AREA_USAGE_LEN) // Some atoms would like to use power in Initialize()
+
+	// Some atoms would like to use power in Initialize()
+	power_load = new /list(AREA_USAGE_LEN)
+	energy_usage = new /list(AREA_USAGE_LEN)
+
 	return ..()
 
 /*
@@ -515,34 +523,24 @@ GLOBAL_LIST_EMPTY(teleportlocs)
 
 
 /**
- * Add a static amount of power load to an area
- *
- * Possible channels
- * *AREA_USAGE_STATIC_EQUIP
- * *AREA_USAGE_STATIC_LIGHT
- * *AREA_USAGE_STATIC_ENVIRON
- */
-/area/proc/addStaticPower(value, powerchannel)
-	switch(powerchannel)
-		if(AREA_USAGE_STATIC_START to AREA_USAGE_STATIC_END)
-			power_usage[powerchannel] += value
+  * Add a static amount of power load to an area
+  *
+  * Arguments:
+  * * power: The power of the load, in watts.
+  * * powerchannel: The channel which the energy will be drawn from. Any of the AREA_USAGE_* consts.
+  */
+/area/proc/add_power_load(power, powerchannel)
+	power_load[powerchannel] += power
 
 /**
- * Clear all power usage in area
- *
- * Clears all power used for equipment, light and environment channels
- */
-/area/proc/clear_usage()
-	for(var/i in AREA_USAGE_DYNAMIC_START to AREA_USAGE_DYNAMIC_END)
-		power_usage[i] = 0
-
-/**
- * Add a power value amount to the stored used_x variables
- */
-/area/proc/use_power(amount, chan)
-	switch(chan)
-		if(AREA_USAGE_DYNAMIC_START to AREA_USAGE_DYNAMIC_END)
-			power_usage[chan] += amount
+  * Consumes energy from the area's APC
+  *
+  * Arguments:
+  * * energy: The energy to consume, in joules.
+  * * powerchannel: The channel which the energy will be drawn from. Any of the AREA_USAGE_* consts.
+  */
+/area/proc/use_energy(energy, powerchannel)
+	energy_usage[powerchannel] += energy
 
 
 /**

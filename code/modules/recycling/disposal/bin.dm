@@ -399,13 +399,13 @@
 	if(machine_stat & NOPOWER) // won't charge if no power
 		return
 
-	use_power(100) // base power usage
+	use_energy(100) // base power usage
 
 	if(!pressure_charging) // if off or ready, no need to charge
 		return
 
 	// otherwise charge
-	use_power(500) // charging power usage
+	use_energy(500) // charging power usage
 
 	var/atom/L = loc //recharging from loc turf
 

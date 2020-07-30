@@ -188,6 +188,9 @@
 #define ETHEREAL_CHARGE_OVERLOAD 2500
 #define ETHEREAL_CHARGE_DANGEROUS 3000
 
+#define ETHEREAL_CELL_CHARGEGAIN 3 /// How much charge the ethereal gets when consuming energy from a cell
+#define ETHEREAL_CELL_CHARGEDRAIN 100e3 /// How much charge the cell loses when consuming from it
+
 //Slime evolution threshold. Controls how fast slimes can split/grow
 #define SLIME_EVOLUTION_THRESHOLD 10
 

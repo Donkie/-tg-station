@@ -9,6 +9,7 @@
 	max_integrity = 300
 	var/equip_cooldown = 0
 	var/equip_ready = TRUE //whether the equipment is ready for use. (or deactivated/activated for static stuff)
+	/// The energy drained when using the equipment, in joules.
 	var/energy_drain = 0
 	var/obj/vehicle/sealed/mecha/chassis = null
 	///Bitflag. Determines the range of the equipment.
@@ -93,14 +94,14 @@
 /obj/item/mecha_parts/mecha_equipment/proc/action(mob/source, atom/target, params)
 	TIMER_COOLDOWN_START(chassis, COOLDOWN_MECHA_EQUIPMENT, equip_cooldown)//Cooldown is on the MECH so people dont bypass it by switching equipment
 	send_byjax(chassis.occupants,"exosuit.browser","[REF(src)]",src.get_equip_info())
-	chassis.use_power(energy_drain)
+	chassis.use_energy(energy_drain)
 	return TRUE
 
 /obj/item/mecha_parts/mecha_equipment/proc/do_after_cooldown(atom/target, mob/user, interaction_key)
 	if(!chassis)
 		return
 	var/C = chassis.loc
-	chassis.use_power(energy_drain)
+	chassis.use_energy(energy_drain)
 	. = do_after(user, equip_cooldown, target=target, interaction_key = interaction_key)
 	if(!chassis || 	chassis.loc != C || src != chassis.selected || !(get_dir(chassis, target)&chassis.dir))
 		return FALSE

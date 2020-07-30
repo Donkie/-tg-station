@@ -7,7 +7,7 @@
 	lefthand_file = 'icons/mob/inhands/equipment/tools_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/equipment/tools_righthand.dmi'
 	force = 7
-	var/powertransfer = 1000
+	var/powertransfer = 1e6
 	var/opened = FALSE
 	var/cell_type = /obj/item/stock_parts/cell/high
 	var/obj/item/stock_parts/cell/cell
@@ -19,9 +19,7 @@
 		cell = new cell_type
 
 /obj/item/inducer/proc/induce(obj/item/stock_parts/cell/target, coefficient)
-	var/totransfer = min(cell.charge,(powertransfer * coefficient))
-	var/transferred = target.give(totransfer)
-	cell.use(transferred)
+	cell.use(target.give(powertransfer * coefficient))
 	cell.update_icon()
 	target.update_icon()
 
@@ -159,7 +157,7 @@
 /obj/item/inducer/examine(mob/living/M)
 	. = ..()
 	if(cell)
-		. += "<span class='notice'>Its display shows: [DisplayEnergy(cell.charge)].</span>"
+		. += "<span class='notice'>Its display shows: [siunit(cell.charge, "J", 1)].</span>"
 	else
 		. += "<span class='notice'>Its display is dark.</span>"
 	if(opened)

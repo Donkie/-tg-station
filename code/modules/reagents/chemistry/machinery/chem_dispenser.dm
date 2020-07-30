@@ -18,16 +18,16 @@
 	icon = 'icons/obj/chemical.dmi'
 	icon_state = "dispenser"
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 40
+	idle_power_usage = 20
 	interaction_flags_machine = INTERACT_MACHINE_OPEN | INTERACT_MACHINE_ALLOW_SILICON | INTERACT_MACHINE_OFFLINE
 	resistance_flags = FIRE_PROOF | ACID_PROOF
 	circuit = /obj/item/circuitboard/machine/chem_dispenser
 	processing_flags = NONE
 
 	var/obj/item/stock_parts/cell/cell
-	var/powerefficiency = 0.1
+	var/powerefficiency = 0.1e-3
 	var/amount = 30
-	var/recharge_amount = 10
+	var/recharge_amount = 10e3 /// Energy recharged per recharge cycle, in joules
 	var/recharge_counter = 0
 	var/mutable_appearance/beaker_overlay
 	var/working_state = "dispenser_working"
@@ -105,8 +105,8 @@
 		. += "<span class='notice'>[src]'s maintenance hatch is open!</span>"
 	if(in_range(user, src) || isobserver(user))
 		. += "<span class='notice'>The status display reads:\n\
-		Recharging <b>[recharge_amount]</b> power units per interval.\n\
-		Power efficiency increased by <b>[round((powerefficiency*1000)-100, 1)]%</b>.</span>"
+		Recharging power: <b>[siunit(recharge_amount, "W", 0.1)]</b>.\n\
+		Power efficiency increased by <b>[round((powerefficiency*1e6)-100, 1)]%</b>.</span>"
 
 
 /obj/machinery/chem_dispenser/on_set_is_operational(old_value)
@@ -118,9 +118,7 @@
 
 /obj/machinery/chem_dispenser/process(delta_time)
 	if (recharge_counter >= 8)
-		var/usedpower = cell.give(recharge_amount)
-		if(usedpower)
-			use_power(250*recharge_amount)
+		use_energy(250 * cell.give(recharge_amount))
 		recharge_counter = 0
 		return
 	recharge_counter += delta_time
@@ -380,17 +378,17 @@
 
 /obj/machinery/chem_dispenser/RefreshParts()
 	recharge_amount = initial(recharge_amount)
-	var/newpowereff = 0.0666666
+	var/newpowereff = 0.0666666e-3
 	for(var/obj/item/stock_parts/cell/P in component_parts)
 		cell = P
 	for(var/obj/item/stock_parts/matter_bin/M in component_parts)
-		newpowereff += 0.0166666666*M.rating
+		newpowereff += 0.0166666666e-3 * M.rating
 	for(var/obj/item/stock_parts/capacitor/C in component_parts)
 		recharge_amount *= C.rating
 	for(var/obj/item/stock_parts/manipulator/M in component_parts)
 		if (M.rating > 3)
 			dispensable_reagents |= upgrade_reagents
-	powerefficiency = round(newpowereff, 0.01)
+	powerefficiency = newpowereff
 
 /obj/machinery/chem_dispenser/proc/replace_beaker(mob/living/user, obj/item/reagent_containers/new_beaker)
 	if(!user)

@@ -373,7 +373,7 @@
 				return
 			if(istype(C, /obj/item/electroadaptive_pseudocircuit))
 				var/obj/item/electroadaptive_pseudocircuit/P = C
-				if(!P.adapt_circuit(user, DEFAULT_STEP_TIME * 0.5))
+				if(!P.adapt_circuit(user, DEFAULT_STEP_TIME * 0.5e3))
 					return
 				user.visible_message("<span class='notice'>[user] fabricates a circuit and places it into [src].</span>", \
 				"<span class='notice'>You adapt a firelock circuit and slot it into the assembly.</span>")

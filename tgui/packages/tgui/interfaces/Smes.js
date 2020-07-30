@@ -1,9 +1,11 @@
 import { useBackend } from '../backend';
 import { Box, Button, Flex, LabeledList, ProgressBar, Section, Slider } from '../components';
-import { formatPower } from '../format';
+import { formatPower, formatBatteryEnergy } from '../format';
 import { Window } from '../layouts';
+import { toFixed } from 'common/math';
 
-// Common power multiplier
+// Common power multiplier.
+// Used to have internal lower values on the bars to make dragging easier
 const POWER_MUL = 1e3;
 
 export const Smes = (props, context) => {
@@ -45,7 +47,11 @@ export const Smes = (props, context) => {
               good: [0.5, Infinity],
               average: [0.15, 0.5],
               bad: [-Infinity, 0.15],
-            }} />
+            }}>
+            {formatBatteryEnergy(charge, 1) + ' / '
+                + formatBatteryEnergy(capacity, 1) + ' ('
+                + toFixed(charge / capacity * 100) + "%)"}
+          </ProgressBar>
         </Section>
         <Section title="Input">
           <LabeledList>
@@ -99,7 +105,7 @@ export const Smes = (props, context) => {
                     icon="forward"
                     disabled={inputLevel === inputLevelMax}
                     onClick={() => act('input', {
-                      adjust: 10000,
+                      adjust: 10e3,
                     })} />
                   <Button
                     icon="fast-forward"

@@ -137,7 +137,7 @@
 /datum/religion_sect/technophile/sect_bless(mob/living/L, mob/living/user)
 	if(iscyborg(L))
 		var/mob/living/silicon/robot/R = L
-		var/charge_amt = 50
+		var/charge_amt = 50e3
 		if(L.mind?.holy_role == HOLY_ROLE_HIGHPRIEST)
 			charge_amt *= 2
 		R.cell?.charge += charge_amt
@@ -183,10 +183,10 @@
 	var/obj/item/stock_parts/cell/the_cell = I
 	if(!istype(the_cell)) //how...
 		return
-	if(the_cell.charge < 300)
+	if(the_cell.charge < 300e3)
 		to_chat(L,"<span class='notice'>[GLOB.deity] does not accept pity amounts of power.</span>")
 		return
-	adjust_favor(round(the_cell.charge/300), L)
+	adjust_favor(round(the_cell.charge/300e3), L)
 	to_chat(L, "<span class='notice'>You offer [the_cell]'s power to [GLOB.deity], pleasing them.</span>")
 	qdel(I)
 	return TRUE

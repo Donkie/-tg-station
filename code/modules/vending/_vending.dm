@@ -871,7 +871,7 @@ GLOBAL_LIST_EMPTY(vending_products)
 				say("Thank you for shopping with [src]!")
 				purchase_message_cooldown = world.time + 5 SECONDS
 				last_shopper = usr
-			use_power(5)
+			use_energy(5)
 			if(icon_vend) //Show the vending animation if needed
 				flick(icon_vend,src)
 			playsound(src, 'sound/machines/machine_vend.ogg', 50, TRUE, extrarange = -3)
@@ -1106,7 +1106,7 @@ GLOBAL_LIST_EMPTY(vending_products)
 					vending_machine_input[N] = max(vending_machine_input[N] - 1, 0)
 					S.forceMove(drop_location())
 					loaded_items--
-					use_power(5)
+					use_energy(5)
 					vend_ready = TRUE
 					updateUsrDialog()
 					return
@@ -1120,7 +1120,7 @@ GLOBAL_LIST_EMPTY(vending_products)
 					vending_machine_input[N] = max(vending_machine_input[N] - 1, 0)
 					S.forceMove(drop_location())
 					loaded_items--
-					use_power(5)
+					use_energy(5)
 					if(last_shopper != usr || purchase_message_cooldown < world.time)
 						say("Thank you for buying local and purchasing [S]!")
 						purchase_message_cooldown = world.time + 5 SECONDS

@@ -112,7 +112,7 @@
 
 		t += "<div class='statusDisplay'>"
 
-		t += "Output: [DisplayPower(lastgenlev)]"
+		t += "Output: [siunit(lastgenlev, "W", 1)]"
 
 		t += "<BR>"
 

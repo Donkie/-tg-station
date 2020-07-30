@@ -157,8 +157,8 @@ GLOBAL_LIST_EMPTY(gateway_destinations)
 	density = TRUE
 
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 100
-	active_power_usage = 5000
+	idle_power_usage = 50
+	active_power_usage = 2500
 
 	var/calibrated = TRUE
 	/// Type of instanced gateway destination, needs to be subtype of /datum/gateway_destination/gateway
@@ -197,7 +197,7 @@ GLOBAL_LIST_EMPTY(gateway_destinations)
 	portal_visuals.reset_visuals()
 
 /obj/machinery/gateway/process()
-	if((machine_stat & (NOPOWER)) && use_power)
+	if((machine_stat & (NOPOWER)) && use_power != NO_POWER_USE)
 		if(target)
 			deactivate()
 		return

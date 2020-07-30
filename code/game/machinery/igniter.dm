@@ -5,8 +5,8 @@
 	icon_state = "igniter0"
 	plane = FLOOR_PLANE
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 2
-	active_power_usage = 4
+	idle_power_usage = 1
+	active_power_usage = 2
 	max_integrity = 300
 	armor = list(MELEE = 50, BULLET = 30, LASER = 70, ENERGY = 50, BOMB = 20, BIO = 0, RAD = 0, FIRE = 100, ACID = 70)
 	resistance_flags = FIRE_PROOF
@@ -32,7 +32,7 @@
 		return
 	add_fingerprint(user)
 
-	use_power(50)
+	use_energy(50)
 	on = !( on )
 	update_icon()
 
@@ -124,8 +124,8 @@
 	flick("[initial(icon_state)]-spark", src)
 	spark_system.start()
 	last_spark = world.time
-	use_power(1000)
-	var/turf/location = loc
+	use_energy(1000)
+	var/turf/location = src.loc
 	if (isturf(location))
 		location.hotspot_expose(1000,2500,1)
 	return 1

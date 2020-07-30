@@ -5,8 +5,8 @@
 	Or you can just drop your plates on the floor, like civilized folk."
 	icon = 'goon/icons/obj/kitchen.dmi'
 	icon_state = "synthesizer"
-	idle_power_usage = 8 //5 with default parts
-	active_power_usage = 13 //10 with default parts
+	idle_power_usage = 4
+	active_power_usage = 8
 	density = FALSE
 	circuit = /obj/item/circuitboard/machine/dish_drive
 	pass_flags = PASSTABLE
@@ -125,7 +125,7 @@
 		if(is_type_in_list(I, disposable_items))
 			LAZYREMOVE(dish_drive_contents, I)
 			I.forceMove(bin)
-			use_power(active_power_usage)
+			use_energy(active_power_usage)
 			disposed++
 	if (disposed)
 		visible_message("<span class='notice'>[src] [pick("whooshes", "bwooms", "fwooms", "pshooms")] and beams [disposed] stored item\s into the nearby [bin.name].</span>")

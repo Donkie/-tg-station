@@ -191,7 +191,7 @@
 			else
 				dotype = matchReaction(process,scantype)
 			experiment(dotype,process)
-			use_power(750)
+			use_energy(750)
 			if(dotype != FAIL)
 				var/list/nodes = techweb_item_boost_check(process)
 				var/picked = pickweight(nodes)		//This should work.
@@ -508,7 +508,7 @@
 			ejectItem(TRUE)
 		if(globalMalf > 76 && globalMalf < 98)
 			visible_message("<span class='warning'>[src] begins to smoke and hiss, shaking violently!</span>")
-			use_power(500000)
+			use_energy(500e3)
 			investigate_log("Experimentor has drained power from its APC", INVESTIGATE_EXPERIMENTOR)
 		if(globalMalf == 99)
 			visible_message("<span class='warning'>[src] begins to glow and vibrate. It's going to blow!</span>")

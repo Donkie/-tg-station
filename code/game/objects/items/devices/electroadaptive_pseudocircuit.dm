@@ -29,7 +29,7 @@
 		to_chat(R, "<span class='warning'>You need a power cell installed for that.</span>")
 		return
 	if(!R.cell.use(circuit_cost))
-		to_chat(R, "<span class='warning'>You don't have the energy for that (you need [DisplayEnergy(circuit_cost)].)</span>")
+		to_chat(R, "<span class='warning'>You don't have the energy for that (you need [siunit(circuit_cost, "J", 1)].)</span>")
 		return
 	if(recharging)
 		to_chat(R, "<span class='warning'>[src] needs some time to recharge first.</span>")
@@ -42,7 +42,7 @@
 	circuits--
 	maptext = MAPTEXT(circuits)
 	icon_state = "[initial(icon_state)]_recharging"
-	var/recharge_time = min(600, circuit_cost * 5)  //40W of cost for one fabrication = 20 seconds of recharge time; this is to prevent spamming
+	var/recharge_time = min(600, circuit_cost * 5e-3)  //40W of cost for one fabrication = 20 seconds of recharge time; this is to prevent spamming
 	addtimer(CALLBACK(src, .proc/recharge), recharge_time)
 	return TRUE //The actual circuit magic itself is done on a per-object basis
 

@@ -133,8 +133,6 @@ GLOBAL_LIST_EMPTY(conveyors_by_id)
 	if(!operating || conveying)
 		return
 
-	use_power(6)
-
 	//get the first 30 items in contents
 	var/turf/locturf = loc
 	var/list/items = locturf.contents - src - locturf.lighting_object
@@ -146,6 +144,8 @@ GLOBAL_LIST_EMPTY(conveyors_by_id)
 	else
 		affecting = items
 	conveying = TRUE
+
+	use_energy(10 + 2 * length(affecting)) // More items means it's heavier so it should take more energy to move them
 
 	addtimer(CALLBACK(src, .proc/convey, affecting), 1)//Movement effect
 

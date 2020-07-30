@@ -4,8 +4,8 @@
 	icon_state = "recharger"
 	desc = "A charging dock for energy based weaponry."
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 4
-	active_power_usage = 250
+	idle_power_usage = 2
+	active_power_usage = 125
 	circuit = /obj/item/circuitboard/machine/recharger
 	pass_flags = PASSTABLE
 	var/obj/item/charging = null
@@ -132,8 +132,7 @@
 		var/obj/item/stock_parts/cell/C = charging.get_cell()
 		if(C)
 			if(C.charge < C.maxcharge)
-				C.give(C.chargerate * recharge_coeff * delta_time / 2)
-				use_power(125 * recharge_coeff * delta_time)
+				use_energy(C.give(C.chargerate * recharge_coeff * delta_time))
 				using_power = TRUE
 			update_icon()
 
@@ -141,7 +140,7 @@
 			var/obj/item/ammo_box/magazine/recharge/R = charging
 			if(R.stored_ammo.len < R.max_ammo)
 				R.stored_ammo += new R.ammo_type(R)
-				use_power(100 * recharge_coeff * delta_time)
+				use_energy(100 * recharge_coeff * delta_time)
 				using_power = TRUE
 			update_icon()
 			return

@@ -57,7 +57,7 @@ Note: Must be placed within 3 tiles of the R&D Console
 		flick("d_analyzer_process", src)
 		busy = TRUE
 		addtimer(CALLBACK(src, .proc/reset_busy), 24)
-		use_power(250)
+		use_energy(250)
 		if(thing == loaded_item)
 			loaded_item = null
 		var/list/food = thing.GetDeconstructableContents()

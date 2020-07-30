@@ -127,7 +127,7 @@
 	for(var/M in D.materials)
 		power += round(D.materials[M] * amount / 35)
 	power = min(3000, power)
-	use_power(power)
+	use_energy(power)
 	var/coeff = efficient_with(D.build_path) ? efficiency_coeff : 1
 	var/list/efficient_mats = list()
 	for(var/MAT in D.materials)

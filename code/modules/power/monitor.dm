@@ -7,8 +7,8 @@
 	icon_keyboard = "power_key"
 	light_color = LIGHT_COLOR_YELLOW
 	use_power = ACTIVE_POWER_USE
-	idle_power_usage = 20
-	active_power_usage = 100
+	idle_power_usage = 10
+	active_power_usage = 50
 	circuit = /obj/item/circuitboard/computer/powermonitor
 	tgui_id = "PowerMonitor"
 
@@ -98,8 +98,8 @@
 	data["areas"] = list()
 
 	if(connected_powernet)
-		data["supply"] = DisplayPower(connected_powernet.viewavail)
-		data["demand"] = DisplayPower(connected_powernet.viewload)
+		data["supply"] = siunit(connected_powernet.viewavail, "W", 1)
+		data["demand"] = siunit(connected_powernet.viewload, "W", 1)
 		for(var/obj/machinery/power/terminal/term in connected_powernet.nodes)
 			var/obj/machinery/power/apc/A = term.master
 			if(istype(A))
@@ -111,7 +111,7 @@
 				data["areas"] += list(list(
 					"name" = A.area.name,
 					"charge" = cell_charge,
-					"load" = DisplayPower(A.lastused_total),
+					"load" = siunit(A.lastused_total, "W", 1),
 					"charging" = A.charging,
 					"eqp" = A.equipment,
 					"lgt" = A.lighting,

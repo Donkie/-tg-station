@@ -34,12 +34,14 @@
 	desc = "Equipment for medical exosuits. A mounted sleeper that stabilizes patients and can inject reagents in the exosuit's reserves."
 	icon = 'icons/obj/machines/sleeper.dmi'
 	icon_state = "sleeper"
-	energy_drain = 20
+	energy_drain = 20e3
 	range = MECHA_MELEE
 	equip_cooldown = 20
 	salvageable = FALSE
 	var/mob/living/carbon/patient = null
 	var/inject_amount = 10
+	/// The power consumption of the sleeper when it's in use, in watts
+	var/power_consumption = 10e3
 
 /obj/item/mecha_parts/mecha_equipment/medical/sleeper/Destroy()
 	for(var/atom/movable/AM in src)
@@ -228,7 +230,7 @@
 	. = ..()
 	if(.)
 		return
-	if(!chassis.has_charge(energy_drain))
+	if(!chassis.has_charge(power_consumption * delta_time))
 		log_message("Deactivated.", LOG_MECHA)
 		to_chat(chassis.occupants, "[icon2html(src, chassis.occupants)]<span class='warning'>[src] deactivated - no power.</span>")
 		STOP_PROCESSING(SSobj, src)
@@ -245,7 +247,7 @@
 	M.AdjustUnconscious(-40 * delta_time)
 	if(M.reagents.get_reagent_amount(/datum/reagent/medicine/epinephrine) < 5)
 		M.reagents.add_reagent(/datum/reagent/medicine/epinephrine, 5)
-	chassis.use_power(energy_drain)
+	chassis.use_energy(power_consumption * delta_time)
 	update_equip_info()
 
 
@@ -263,7 +265,7 @@
 	icon_state = "syringegun"
 	range = MECHA_MELEE|MECHA_RANGED
 	equip_cooldown = 10
-	energy_drain = 10
+	energy_drain = 10e3
 	///Lazylist of syringes that we've picked up
 	var/list/syringes
 	///List of all scanned reagents, starts with epinephrine and multiver
@@ -274,10 +276,12 @@
 	var/max_syringes = 10
 	///Maximum volume of reagents we can hold
 	var/max_volume = 75
-	///Reagent amount in units we produce per two seconds
+	///Reagent amount in units we produce per second
 	var/synth_speed = 2.5
 	///Chooses what kind of action we should perform when clicking
 	var/mode = FIRE_SYRINGE_MODE // fire syringe or analyze reagents.
+	/// Power consumed when processing reagents, in watts
+	var/power_consumption = 5e3
 
 /obj/item/mecha_parts/mecha_equipment/medical/syringe_gun/Initialize()
 	. = ..()
@@ -499,14 +503,14 @@
 	. = ..()
 	if(.)
 		return
-	if(!LAZYLEN(processed_reagents) || reagents.total_volume >= reagents.maximum_volume || !chassis.has_charge(energy_drain))
+	if(!LAZYLEN(processed_reagents) || reagents.total_volume >= reagents.maximum_volume || !chassis.has_charge(power_consumption * delta_time))
 		to_chat(chassis.occupants, "[icon2html(src, chassis.occupants)]<span class='alert'>Reagent processing stopped.</span>")
 		log_message("Reagent processing stopped.", LOG_MECHA)
 		return PROCESS_KILL
 	var/amount = delta_time * synth_speed / LAZYLEN(processed_reagents)
 	for(var/reagent in processed_reagents)
 		reagents.add_reagent(reagent,amount)
-		chassis.use_power(energy_drain)
+		chassis.use_energy(power_consumption * delta_time)
 
 #undef FIRE_SYRINGE_MODE
 #undef ANALYZE_SYRINGE_MODE
@@ -517,7 +521,7 @@
 	name = "exosuit medical beamgun"
 	desc = "Equipment for medical exosuits. Generates a focused beam of medical nanites."
 	icon_state = "mecha_medigun"
-	energy_drain = 10
+	energy_drain = 10e3
 	range = MECHA_MELEE|MECHA_RANGED
 	equip_cooldown = 0
 	///The medical gun doing the actual healing. yes its wierd but its better than copypasting the entire thing
@@ -534,11 +538,11 @@
 	QDEL_NULL(medigun)
 	return ..()
 
-/obj/item/mecha_parts/mecha_equipment/medical/mechmedbeam/process(deltatime)
+/obj/item/mecha_parts/mecha_equipment/medical/mechmedbeam/process(delta_time)
 	. = ..()
 	if(.)
 		return
-	medigun.process(SSOBJ_DT)
+	medigun.process(delta_time)
 
 /obj/item/mecha_parts/mecha_equipment/medical/mechmedbeam/action(mob/source, atom/movable/target, params)
 	medigun.process_fire(target, loc)

@@ -25,8 +25,8 @@
 	///Whether or not this modular computer uses the looping sound
 	var/looping_sound = TRUE
 
-	var/base_active_power_usage = 50						// Power usage when the computer is open (screen is active) and can be interacted with. Remember hardware can use power too.
-	var/base_idle_power_usage = 5							// Power usage when the computer is idle and screen is off (currently only applies to laptops)
+	var/base_active_power_usage = 25						/// Power usage when the computer is open (screen is active) and can be interacted with. Remember hardware can use power too. In watts
+	var/base_idle_power_usage = 2							/// Power usage when the computer is idle and screen is off (currently only applies to laptops). In watts
 
 	// Modular computers can run on various devices. Each DEVICE (Laptop, Console, Tablet,..)
 	// must have it's own DMI file. Icon states must be called exactly the same in all files, but may look differently
@@ -209,7 +209,7 @@
 	if(recharger)
 		recharger.enabled = 1
 
-	if(all_components[MC_CPU] && use_power()) // use_power() checks if the PC is powered
+	if(all_components[MC_CPU] && use_energy()) // use_energy() checks if the PC is powered
 		if(issynth)
 			to_chat(user, "<span class='notice'>You send an activation signal to \the [src], turning it on.</span>")
 		else
@@ -315,7 +315,7 @@
 		data["PC_batterypercent"] = "N/C"
 		data["PC_showbatteryicon"] = battery_module ? 1 : 0
 
-	if(recharger && recharger.enabled && recharger.check_functionality() && recharger.use_power(0))
+	if(recharger && recharger.enabled && recharger.check_functionality() && recharger.use_energy())
 		data["PC_apclinkicon"] = "charging.gif"
 
 	switch(get_ntnet_status())

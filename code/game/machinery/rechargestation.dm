@@ -5,8 +5,8 @@
 	icon_state = "borgcharger0"
 	density = FALSE
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 5
-	active_power_usage = 1000
+	idle_power_usage = 2
+	active_power_usage = 500
 	req_access = list(ACCESS_ROBOTICS)
 	state_open = TRUE
 	circuit = /obj/item/circuitboard/machine/cyborgrecharger
@@ -27,16 +27,16 @@
 	recharge_speed = 0
 	repairs = 0
 	for(var/obj/item/stock_parts/capacitor/C in component_parts)
-		recharge_speed += C.rating * 100
+		recharge_speed += C.rating * 100e3
 	for(var/obj/item/stock_parts/manipulator/M in component_parts)
 		repairs += M.rating - 1
 	for(var/obj/item/stock_parts/cell/C in component_parts)
-		recharge_speed *= C.maxcharge / 10000
+		recharge_speed *= C.maxcharge / 10e6
 
 /obj/machinery/recharge_station/examine(mob/user)
 	. = ..()
 	if(in_range(user, src) || isobserver(user))
-		. += "<span class='notice'>The status display reads: Recharging <b>[recharge_speed]J</b> per cycle.</span>"
+		. += "<span class='notice'>The status display reads: Charging power: <b>[siunit(recharge_speed, "W", 1)]</b>.</span>"
 		if(repairs)
 			. += "<span class='notice'>[src] has been upgraded to support automatic repairs.</span>"
 

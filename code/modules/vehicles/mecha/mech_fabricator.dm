@@ -5,8 +5,8 @@
 	desc = "Nothing is being built."
 	density = TRUE
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 20
-	active_power_usage = 5000
+	idle_power_usage = 10
+	active_power_usage = 2500
 	req_access = list(ACCESS_ROBOTICS)
 	circuit = /obj/item/circuitboard/machine/mechfab
 	processing_flags = START_PROCESSING_MANUALLY

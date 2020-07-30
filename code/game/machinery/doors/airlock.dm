@@ -1114,7 +1114,7 @@
 	if(forced < 2)
 		if(obj_flags & EMAGGED)
 			return FALSE
-		use_power(50)
+		use_energy(50)
 		playsound(src, doorOpen, 30, TRUE)
 
 		if(closeOther != null && istype(closeOther, /obj/machinery/door/airlock/) && !closeOther.density)
@@ -1165,7 +1165,7 @@
 	if(forced < 2)
 		if(obj_flags & EMAGGED)
 			return
-		use_power(50)
+		use_energy(50)
 		playsound(src, doorClose, 30, TRUE)
 
 	else

@@ -5,7 +5,7 @@
 	icon = 'icons/obj/machines/suit_storage.dmi'
 	icon_state = "close"
 	use_power = ACTIVE_POWER_USE
-	active_power_usage = 60
+	active_power_usage = 30
 	power_channel = AREA_USAGE_EQUIP
 	density = TRUE
 	max_integrity = 250
@@ -47,8 +47,8 @@
 	var/message_cooldown
 	/// How long it takes to break out of the SSU.
 	var/breakout_time = 300
-	/// How fast it charges cells in a suit
-	var/charge_rate = 250
+	/// How fast it charges cells in a suit, in watts
+	var/charge_rate = 250e3
 
 /obj/machinery/suit_storage_unit/Initialize()
 	. = ..()
@@ -417,9 +417,7 @@
 	if(!suit.cell)
 		return
 
-	var/obj/item/stock_parts/cell/C = suit.cell
-	use_power(charge_rate * delta_time)
-	C.give(charge_rate * delta_time)
+	use_energy(suit.cell.give(charge_rate * delta_time))
 
 /obj/machinery/suit_storage_unit/proc/shock(mob/user, prb)
 	if(!prob(prb))

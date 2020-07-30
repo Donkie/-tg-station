@@ -25,8 +25,8 @@
 
 	var/spawn_mecha_type = /obj/vehicle/sealed/mecha/combat/marauder/mauler/loaded
 	var/obj/vehicle/sealed/mecha/mecha //Ref to pilot's mecha instance
-	var/required_mecha_charge = 7500 //If the pilot doesn't have a mecha, what charge does a potential Grand Theft Mecha need? (Defaults to half a battery)
-	var/mecha_charge_evacuate = 50 //Amount of charge at which the pilot tries to abandon the mecha
+	var/required_mecha_charge = 7.5e6 //If the pilot doesn't have a mecha, what charge does a potential Grand Theft Mecha need? (Defaults to half a battery), in joules
+	var/mecha_charge_evacuate = 50e3 //Amount of charge at which the pilot tries to abandon the mecha, in joules
 
 	//Vars that control when the pilot uses their mecha's abilities (if the mecha has that ability)
 	var/threat_use_mecha_smoke = 5 //5 mobs is enough to engage crowd control

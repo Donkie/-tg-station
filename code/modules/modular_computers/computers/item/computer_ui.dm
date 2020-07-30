@@ -8,7 +8,7 @@
 		if(ui)
 			ui.close()
 		return
-	if(!use_power())
+	if(!use_energy())
 		if(ui)
 			ui.close()
 		return

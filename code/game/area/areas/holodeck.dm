@@ -25,14 +25,14 @@
 	ASSERT(!istype(A, /area/holodeck))
 	return A.powered(chan)
 
-/area/holodeck/addStaticPower(value, powerchannel)
+/area/holodeck/add_power_load(value, powerchannel)
 	if(!linked)
 		return
 	var/area/A = get_area(linked)
 	ASSERT(!istype(A, /area/holodeck))
 	return ..()
 
-/area/holodeck/use_power(amount, chan)
+/area/holodeck/use_energy(energy, chan)
 	if(!linked)
 		return FALSE
 	var/area/A = get_area(linked)

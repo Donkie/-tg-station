@@ -73,6 +73,10 @@ export const formatPower = (value, minBase1000 = 0) => {
   return formatSiUnit(value, minBase1000, 'W');
 };
 
+export const formatBatteryEnergy = (valueInJoules, minBase1000 = 0) => {
+  return formatSiUnit(valueInJoules / 3600, minBase1000, 'Wh');
+};
+
 export const formatMoney = (value, precision = 0) => {
   if (!Number.isFinite(value)) {
     return value;

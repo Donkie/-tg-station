@@ -28,12 +28,12 @@ RSF
 	///The cost of the object we are going to dispense
 	var/dispense_cost = 0
 	w_class = WEIGHT_CLASS_NORMAL
-	///An associated list of atoms and charge costs. This can contain a seperate list, as long as it's associated item is an object
-	var/list/cost_by_item = list(/obj/item/reagent_containers/food/drinks/drinkingglass = 20,
-								/obj/item/paper = 10,
-								/obj/item/storage/pill_bottle/dice = 200,
-								/obj/item/pen = 50,
-								/obj/item/clothing/mask/cigarette = 10,
+	///An associated list of atoms and charge costs (in joules). This can contain a seperate list, as long as it's associated item is an object
+	var/list/cost_by_item = list(/obj/item/reagent_containers/food/drinks/drinkingglass = 20e3,
+								/obj/item/paper = 10e3,
+								/obj/item/storage/pill_bottle/dice = 200e3,
+								/obj/item/pen = 50e3,
+								/obj/item/clothing/mask/cigarette = 10e3,
 								)
 	///An associated list of fuel and it's value
 	var/list/matter_by_item = list(/obj/item/rcd_ammo = 10,)

@@ -8,7 +8,7 @@
 /obj/item/borg/stun
 	name = "electrically-charged arm"
 	icon_state = "elecarm"
-	var/charge_cost = 30
+	var/charge_cost = 30e3 /// Energy consumption on use, in joules
 
 /obj/item/borg/stun/attack(mob/living/M, mob/living/user)
 	if(ishuman(M))
@@ -126,7 +126,7 @@
 							user.visible_message("<span class='userdanger'>[user] shocks [M]. It does not seem to have an effect</span>", \
 								"<span class='danger'>You shock [M] to no effect.</span>")
 					playsound(loc, 'sound/effects/sparks2.ogg', 50, TRUE, -1)
-					user.cell.charge -= 500
+					user.cell.charge -= 500e3
 					scooldown = world.time + 20
 		if(3)
 			if(ccooldown < world.time)
@@ -139,7 +139,7 @@
 								"<span class='danger'>You crush [M]!</span>")
 					playsound(loc, 'sound/weapons/smash.ogg', 50, TRUE, -1)
 					M.adjustBruteLoss(15)
-					user.cell.charge -= 300
+					user.cell.charge -= 300e3
 					ccooldown = world.time + 10
 
 /obj/item/borg/cyborghug/peacekeeper
@@ -186,10 +186,7 @@
 				if((M.machine_stat & (NOPOWER|BROKEN)) || !M.anchored)
 					break
 
-				if(!user.cell.give(150))
-					break
-
-				M.use_power(200)
+				M.use_energy(user.cell.give(150e3) / 0.75)
 
 			to_chat(user, "<span class='notice'>You stop charging yourself.</span>")
 
@@ -292,10 +289,10 @@
 
 	if(iscyborg(user))
 		var/mob/living/silicon/robot/R = user
-		if(!R.cell || R.cell.charge < 1200)
+		if(!R.cell || R.cell.charge < 1.2e6)
 			to_chat(user, "<span class='warning'>You don't have enough charge to do this!</span>")
 			return
-		R.cell.charge -= 1000
+		R.cell.charge -= 1e6
 		if(R.emagged)
 			safety = FALSE
 
@@ -453,7 +450,7 @@
 	check_amount()
 	if(iscyborg(user))
 		var/mob/living/silicon/robot/R = user
-		if(!R.cell.use(12))
+		if(!R.cell.use(12e3))
 			to_chat(user, "<span class='warning'>Not enough power.</span>")
 			return FALSE
 	switch(mode)
@@ -578,20 +575,20 @@
 	desc = "A device that projects a dampening field that weakens kinetic energy above a certain threshold. <span class='boldnotice'>Projects a field that drains power per second while active, that will weaken and slow damaging projectiles inside its field.</span> Still being a prototype, it tends to induce a charge on ungrounded metallic surfaces."
 	icon = 'icons/obj/device.dmi'
 	icon_state = "shield"
-	var/maxenergy = 1500
-	var/energy = 1500
+	var/maxenergy = 1.5e6
+	var/energy = 1.5e6
 	/// Recharging rate in energy per second
-	var/energy_recharge = 37.5
+	var/energy_recharge = 37.5e3
 	var/energy_recharge_cyborg_drain_coefficient = 0.4
 	var/cyborg_cell_critical_percentage = 0.05
 	var/mob/living/silicon/robot/host = null
 	var/datum/proximity_monitor/advanced/dampening_field
 	var/projectile_damage_coefficient = 0.5
 	/// Energy cost per tracked projectile damage amount per second
-	var/projectile_damage_tick_ecost_coefficient = 10
+	var/projectile_damage_tick_ecost_coefficient = 10e3
 	var/projectile_speed_coefficient = 1.5		//Higher the coefficient slower the projectile.
 	/// Energy cost per tracked projectile per second
-	var/projectile_tick_speed_ecost = 75
+	var/projectile_tick_speed_ecost = 75e3
 	var/list/obj/projectile/tracked
 	var/image/projectile_effect
 	var/field_radius = 3
@@ -599,9 +596,9 @@
 	var/cycle_delay = 0
 
 /obj/item/borg/projectile_dampen/debug
-	maxenergy = 50000
-	energy = 50000
-	energy_recharge = 5000
+	maxenergy = 50e6
+	energy = 50e6
+	energy_recharge = 5e6
 
 /obj/item/borg/projectile_dampen/Initialize()
 	. = ..()

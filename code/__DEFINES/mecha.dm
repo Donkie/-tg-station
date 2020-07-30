@@ -25,3 +25,6 @@
 #define MECHA_SECURE_BOLTS 1
 #define MECHA_LOOSE_BOLTS 2
 #define MECHA_OPEN_HATCH 3
+
+/// Power consumption of mecha lights, in watts
+#define MECHA_LIGHTSPOWER 1e3

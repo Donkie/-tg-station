@@ -77,7 +77,7 @@
 		if(charge_timer < charge_delay)
 			return
 		charge_timer = 0
-		cell.give(100)
+		cell.give(100e3)
 		if(!chambered) //if empty chamber we try to charge a new shot
 			recharge_newshot(TRUE)
 		update_icon()

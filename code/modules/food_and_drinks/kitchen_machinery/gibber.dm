@@ -5,8 +5,8 @@
 	icon_state = "grinder"
 	density = TRUE
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 2
-	active_power_usage = 500
+	idle_power_usage = 1
+	active_power_usage = 250
 	circuit = /obj/item/circuitboard/machine/gibber
 
 	var/operating = FALSE //Is it on?
@@ -139,7 +139,7 @@
 	if(!occupant)
 		audible_message("<span class='hear'>You hear a loud metallic grinding sound.</span>")
 		return
-	use_power(1000)
+	use_energy(1000)
 	audible_message("<span class='hear'>You hear a loud squelchy grinding sound.</span>")
 	playsound(loc, 'sound/machines/juicer.ogg', 50, TRUE)
 	operating = TRUE

@@ -36,7 +36,7 @@
 	if(C?.registered_account)
 		account = C.registered_account
 	if(account?.account_job?.paycheck_department == payment_department)
-		use_power(20)
+		use_energy(20)
 		paying_customer = TRUE
 		say("Hello, esteemed medical staff!")
 		RefreshParts()
@@ -44,7 +44,7 @@
 	var/bonus_fee = pandemonium ? rand(10,30) : 0
 	if(attempt_charge(src, H, bonus_fee) & COMPONENT_OBJ_CANCEL_CHARGE )
 		return
-	use_power(20)
+	use_energy(20)
 	paying_customer = TRUE
 	icon_state = "kiosk_active"
 	say("Thank you for your patronage!")

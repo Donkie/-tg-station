@@ -115,7 +115,7 @@
 	addtimer(CALLBACK(src, .proc/flash_end), FLASH_LIGHT_DURATION, TIMER_OVERRIDE|TIMER_UNIQUE)
 
 	last_flash = world.time
-	use_power(1000)
+	use_energy(1000)
 
 	var/flashed = FALSE
 	for (var/mob/living/L in viewers(src, null))

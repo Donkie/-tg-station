@@ -61,7 +61,7 @@
 		battery = null
 
 		if(holder)
-			if(holder.enabled && !holder.use_power())
+			if(holder.enabled && !holder.use_energy())
 				holder.shutdown_computer()
 
 		return TRUE
@@ -78,7 +78,7 @@
 	icon = 'icons/obj/module.dmi'
 	icon_state = "cell_mini"
 	w_class = WEIGHT_CLASS_TINY
-	maxcharge = 750
+	maxcharge = 750e3
 
 
 /obj/item/stock_parts/cell/computer/advanced
@@ -86,23 +86,23 @@
 	desc = "An advanced power cell, often used in most laptops. It is too large to be fitted into smaller devices."
 	icon_state = "cell"
 	w_class = WEIGHT_CLASS_SMALL
-	maxcharge = 1500
+	maxcharge = 1.5e6
 
 /obj/item/stock_parts/cell/computer/super
 	name = "super battery"
 	desc = "An advanced power cell, often used in high-end laptops."
 	icon_state = "cell"
 	w_class = WEIGHT_CLASS_SMALL
-	maxcharge = 2000
+	maxcharge = 2e6
 
 /obj/item/stock_parts/cell/computer/micro
 	name = "micro battery"
 	desc = "A small power cell, commonly seen in most portable microcomputers."
 	icon_state = "cell_micro"
-	maxcharge = 500
+	maxcharge = 500e3
 
 /obj/item/stock_parts/cell/computer/nano
 	name = "nano battery"
 	desc = "A tiny power cell, commonly seen in low-end portable microcomputers."
 	icon_state = "cell_micro"
-	maxcharge = 300
+	maxcharge = 300e3

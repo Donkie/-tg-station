@@ -68,7 +68,7 @@
 			else if(istype(item, /obj/item/stock_parts/cell))
 				var/obj/item/stock_parts/cell/C = item
 				if(prob(80))
-					C.maxcharge -= 200
+					C.maxcharge -= 200e3
 				if(C.maxcharge <= 1) //Div by 0 protection
 					C.maxcharge = 1
 					burnt_out = TRUE
@@ -81,7 +81,7 @@
 					if(istype(I, /obj/item/stock_parts/cell/))
 						var/obj/item/stock_parts/cell/C = I
 						if(prob(80))
-							C.maxcharge -= 200
+							C.maxcharge -= 200e3
 						if(C.maxcharge <= 1) //Div by 0 protection
 							C.maxcharge = 1
 							burnt_out = TRUE

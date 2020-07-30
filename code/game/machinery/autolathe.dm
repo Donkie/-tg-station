@@ -8,8 +8,8 @@
 	icon_state = "autolathe"
 	density = TRUE
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 10
-	active_power_usage = 100
+	idle_power_usage = 5
+	active_power_usage = 50
 	circuit = /obj/item/circuitboard/machine/autolathe
 	layer = BELOW_OBJ_LAYER
 
@@ -125,14 +125,13 @@
 
 /obj/machinery/autolathe/proc/AfterMaterialInsert(item_inserted, id_inserted, amount_inserted)
 	if(istype(item_inserted, /obj/item/stack/ore/bluespace_crystal))
-		use_power(MINERAL_MATERIAL_AMOUNT / 10)
+		use_energy(MINERAL_MATERIAL_AMOUNT / 10)
 	else if(custom_materials && custom_materials.len && custom_materials[SSmaterials.GetMaterialRef(/datum/material/glass)])
 		flick("autolathe_r",src)//plays glass insertion animation by default otherwise
 	else
 		flick("autolathe_o",src)//plays metal insertion animation
 
-
-		use_power(min(1000, amount_inserted / 100))
+	use_energy(min(1000, amount_inserted / 100))
 	updateUsrDialog()
 
 /obj/machinery/autolathe/Topic(href, href_list)
@@ -167,7 +166,7 @@
 			for(var/MAT in being_built.materials)
 				total_amount += being_built.materials[MAT]
 
-			var/power = max(2000, (total_amount)*multiplier/5) //Change this to use all materials
+			var/energy = max(2000, (total_amount)*multiplier/5) //Change this to use all materials
 
 			var/datum/component/material_container/materials = GetComponent(/datum/component/material_container)
 
@@ -192,10 +191,10 @@
 
 			if(materials.has_materials(materials_used))
 				busy = TRUE
-				use_power(power)
+				use_energy(energy)
 				icon_state = "autolathe_n"
 				var/time = is_stack ? 32 : (32 * coeff * multiplier) ** 0.8
-				addtimer(CALLBACK(src, .proc/make_item, power, materials_used, custom_materials, multiplier, coeff, is_stack, usr), time)
+				addtimer(CALLBACK(src, .proc/make_item, energy, materials_used, custom_materials, multiplier, coeff, is_stack, usr), time)
 			else
 				to_chat(usr, "<span class=\"alert\">Not enough materials for this operation.</span>")
 
@@ -214,10 +213,10 @@
 
 	return
 
-/obj/machinery/autolathe/proc/make_item(power, list/materials_used, list/picked_materials, multiplier, coeff, is_stack, mob/user)
+/obj/machinery/autolathe/proc/make_item(energy, list/materials_used, list/picked_materials, multiplier, coeff, is_stack, mob/user)
 	var/datum/component/material_container/materials = GetComponent(/datum/component/material_container)
 	var/atom/A = drop_location()
-	use_power(power)
+	use_energy(energy)
 
 	materials.use_materials(materials_used)
 

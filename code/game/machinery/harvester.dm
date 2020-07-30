@@ -6,7 +6,7 @@
 	icon_state = "harvester"
 	verb_say = "states"
 	state_open = FALSE
-	idle_power_usage = 50
+	idle_power_usage = 25
 	circuit = /obj/item/circuitboard/machine/harvester
 	light_color = LIGHT_COLOR_BLUE
 	var/interval = 20
@@ -124,7 +124,7 @@
 				O.forceMove(target) //Some organs, like chest ones, are different so we need to manually move them
 		operation_order.Remove(BP)
 		break
-	use_power(5000)
+	use_energy(5000)
 	addtimer(CALLBACK(src, .proc/harvest), interval)
 
 /obj/machinery/harvester/proc/end_harvesting()

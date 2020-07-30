@@ -25,10 +25,10 @@
 	var/draining = FALSE
 	///Whether or not we can currently drain something
 	var/candrain = FALSE
-	///Minimum amount of power we can drain in a single drain action
-	var/mindrain = 200
-	///Maximum amount of power we can drain in a single drain action
-	var/maxdrain = 400
+	///Minimum amount of energy we can drain in a single drain action
+	var/mindrain = 200e3
+	///Maximum amount of energy we can drain in a single drain action
+	var/maxdrain = 400e3
 	///Whether or not the communication console hack was used to summon another antagonist
 	var/communication_console_hack_success = FALSE
 	///How many times the gloves have been used to force open doors.
@@ -60,7 +60,7 @@
 
 	if(isnum(.)) //Numerical values of drained handle their feedback here, Alpha values handle it themselves (Research hacking)
 		if(.)
-			to_chat(wearer, "<span class='notice'>Gained <B>[DisplayEnergy(.)]</B> of energy from [A].</span>")
+			to_chat(wearer, "<span class='notice'>Gained <B>[siunit(., "J", 1)]</B> of energy from [A].</span>")
 		else
 			to_chat(wearer, "<span class='danger'>\The [A] has run dry of energy, you must find another source!</span>")
 	else

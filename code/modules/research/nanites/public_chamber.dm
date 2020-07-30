@@ -8,8 +8,8 @@
 	use_power = IDLE_POWER_USE
 	anchored = TRUE
 	density = TRUE
-	idle_power_usage = 50
-	active_power_usage = 300
+	idle_power_usage = 25
+	active_power_usage = 150
 
 	var/cloud_id = 1
 	var/locked = FALSE

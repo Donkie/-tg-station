@@ -14,7 +14,7 @@
 	mecha_flags =  CANSTRAFE | IS_ENCLOSED | HAS_LIGHTS | QUIET_STEPS | QUIET_TURNS
 	internal_damage_threshold = 25
 	max_equip = 2
-	step_energy_drain = 3
+	step_energy_drain = 3e3
 	color = "#87878715"
 
 /obj/vehicle/sealed/mecha/combat/reticence/loaded/Initialize()

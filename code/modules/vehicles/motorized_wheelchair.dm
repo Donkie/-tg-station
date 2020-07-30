@@ -5,7 +5,7 @@
 	max_integrity = 150
 	var/speed = 2
 	var/power_efficiency = 1
-	var/power_usage = 100
+	var/power_usage = 100e3 /// Energy consumption on move, in joules
 	var/panel_open = FALSE
 	var/list/required_parts = list(/obj/item/stock_parts/manipulator,
 							/obj/item/stock_parts/manipulator,
@@ -123,7 +123,7 @@
 		return
 	. += "Speed: [speed]"
 	. += "Energy efficiency: [power_efficiency]"
-	. += "Power: [power_cell.charge] out of [power_cell.maxcharge]"
+	. += "Charge: [siunit(power_cell.charge, "J", 0.1)] out of [siunit(power_cell.maxcharge, "J", 0.1)]"
 
 /obj/vehicle/ridden/wheelchair/motorized/Bump(atom/A)
 	. = ..()

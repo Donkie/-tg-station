@@ -16,7 +16,7 @@
 	circuit = /obj/item/circuitboard/machine/ltsrbt
 	density = TRUE
 
-	idle_power_usage = 200
+	idle_power_usage = 100
 
 	/// Divider for power_usage_per_teleport.
 	var/power_efficiency = 1
@@ -86,7 +86,7 @@
 			var/atom/movable/M = P.item
 			M.forceMove(T)
 
-		use_power(power_usage_per_teleport / power_efficiency)
+		use_energy(power_usage_per_teleport / power_efficiency)
 		var/datum/effect_system/spark_spread/sparks = new
 		sparks.set_up(5, 1, get_turf(src))
 		sparks.attach(P.item)
@@ -105,7 +105,7 @@
 			QDEL_NULL(transmitting)
 			return
 		do_teleport(P.item, get_turf(P.uplink))
-		use_power(power_usage_per_teleport / power_efficiency)
+		use_energy(power_usage_per_teleport / power_efficiency)
 		QDEL_NULL(transmitting)
 
 		recharge_cooldown = recharge_time

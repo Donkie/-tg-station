@@ -97,8 +97,8 @@ Slimecrossing Items
 	icon_state = "yellow slime extract"
 	rating = 7
 	custom_materials = null
-	maxcharge = 50000
-	chargerate = 2500
+	maxcharge = 50e6
+	chargerate = 1.25e6
 
 //Barrier cube - Chilling Grey
 /obj/item/barriercube

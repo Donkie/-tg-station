@@ -202,24 +202,24 @@
 		return INVALID_DRAIN
 
 	var/maxcapacity = FALSE //Safety check
-	var/drain = 0 //Drain amount
-
 	var/drain_total = 0
 
 	var/datum/powernet/wire_powernet = powernet
 	while(ninja_gloves.candrain && !maxcapacity && src)
-		drain = (round((rand(ninja_gloves.mindrain, ninja_gloves.maxdrain))/2))
-		var/drained = 0
+		var/drain = round(rand(ninja_gloves.mindrain, ninja_gloves.maxdrain) / 2) // Amount we try to drain, in joules
+		var/drained = 0 // Amount we actually drained, in joules
+
 		if(wire_powernet && do_after(ninja ,10, target = src))
-			drained = min(drain, delayed_surplus())
-			add_delayedload(drained)
+			drained = min(drain, delayed_surplus() * SSMACHINES_DT)
+			add_delayedload(drained / SSMACHINES_DT)
+
 			if(drained < drain)//if no power on net, drain apcs
 				for(var/obj/machinery/power/terminal/affected_terminal in wire_powernet.nodes)
 					if(istype(affected_terminal.master, /obj/machinery/power/apc))
 						var/obj/machinery/power/apc/AP = affected_terminal.master
 						if(AP.operating && AP.cell && AP.cell.charge > 0)
-							AP.cell.charge = max(0, AP.cell.charge - 5)
-							drained += 5
+							AP.cell.charge = max(0, AP.cell.charge - 5e3)
+							drained += 5e3
 		else
 			break
 
@@ -294,8 +294,8 @@
 
 	. = DRAIN_MOB_SHOCK_FAILED
 
-	//Default cell = 10,000 charge, 10,000/1000 = 10 uses without charging/upgrading
-	if(ninja_suit.cell?.charge && ninja_suit.cell.use(1000))
+	//Default cell = 10 MJ, 10MJ/1MJ = 10 uses without charging/upgrading
+	if(ninja_suit.cell?.charge && ninja_suit.cell.use(1e6))
 		. = DRAIN_MOB_SHOCK
 		//Got that electric touch
 		var/datum/effect_system/spark_spread/spark_system = new /datum/effect_system/spark_spread()

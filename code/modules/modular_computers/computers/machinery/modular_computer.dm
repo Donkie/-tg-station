@@ -5,7 +5,7 @@
 	desc = "An advanced computer."
 
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 5
+	idle_power_usage = 2
 	var/hardware_flag = 0								// A flag that describes this device type
 	var/last_power_usage = 0							// Power usage during last tick
 
@@ -22,8 +22,8 @@
 	var/max_hardware_size = 0							// Maximal hardware size. Currently, tablets have 1, laptops 2 and consoles 3. Limits what hardware types can be installed.
 	var/steel_sheet_cost = 10							// Amount of steel sheets refunded when disassembling an empty frame of this computer.
 	var/light_strength = 0								// Light luminosity when turned on
-	var/base_active_power_usage = 100					// Power usage when the computer is open (screen is active) and can be interacted with. Remember hardware can use power too.
-	var/base_idle_power_usage = 10						// Power usage when the computer is idle and screen is off (currently only applies to laptops)
+	var/base_active_power_usage = 50					/// Power usage when the computer is open (screen is active) and can be interacted with. Remember hardware can use power too. In watts
+	var/base_idle_power_usage = 5						/// Power usage when the computer is idle and screen is off (currently only applies to laptops). In watts
 
 	var/obj/item/modular_computer/processor/cpu = null				// CPU that handles most logic while this type only handles power and other specific things.
 
@@ -58,7 +58,7 @@
 	icon_state = icon_state_powered
 
 	if(!cpu || !cpu.enabled)
-		if (!(machine_stat & NOPOWER) && (cpu?.use_power()))
+		if (!(machine_stat & NOPOWER) && (cpu?.use_energy()))
 			add_overlay(screen_icon_screensaver)
 		else
 			icon_state = icon_state_unpowered
@@ -105,7 +105,7 @@
 
 // Modular computers can have battery in them, we handle power in previous proc, so prevent this from messing it up for us.
 /obj/machinery/modular_computer/power_change()
-	if(cpu?.use_power()) // If MC_CPU still has a power source, PC wouldn't go offline.
+	if(cpu?.use_energy()) // If MC_CPU still has a power source, PC wouldn't go offline.
 		set_machine_stat(machine_stat & ~NOPOWER)
 		update_icon()
 		return

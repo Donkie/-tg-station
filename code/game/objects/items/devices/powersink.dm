@@ -18,9 +18,9 @@
 	throw_speed = 1
 	throw_range = 2
 	custom_materials = list(/datum/material/iron=750)
-	var/drain_rate = 2000000	// amount of power to drain per tick
-	var/power_drained = 0 		// has drained this much power
-	var/max_power = 6e8		// maximum power that can be drained before exploding
+	var/drain_rate = 2e6 /// Power drain in watts
+	var/power_drained = 0 // has drained this much power
+	var/max_power = 12e8 // maximum energy that can be drained before exploding
 	var/mode = 0		// 0 = off, 1=clamped (off), 2=operating
 	var/admins_warned = FALSE // stop spam, only warn the admins once that we are about to boom
 
@@ -120,7 +120,7 @@
 				"<span class='hear'>You hear a click.</span>")
 			set_mode(CLAMPED_OFF)
 
-/obj/item/powersink/process()
+/obj/item/powersink/process(delta_time)
 	if(!attached)
 		set_mode(DISCONNECTED)
 		return
@@ -131,26 +131,36 @@
 
 		// found a powernet, so drain up to max power from it
 
-		var/drained = min ( drain_rate, attached.newavail() )
+		// Drained power [W]
+		var/drained = min(drain_rate, attached.newavail())
 		attached.add_delayedload(drained)
-		power_drained += drained
+
+		power_drained += drained * delta_time
 
 		// if tried to drain more than available on powernet
 		// now look for APCs and drain their cells
 		if(drained < drain_rate)
+			var/drain_energy_left = (drain_rate - drained) * delta_time // How much energy we have left to drain
+
 			for(var/obj/machinery/power/terminal/T in PN.nodes)
 				if(istype(T.master, /obj/machinery/power/apc))
 					var/obj/machinery/power/apc/A = T.master
 					if(A.operating && A.cell)
-						A.cell.charge = max(0, A.cell.charge - 50)
-						power_drained += 50
-						if(A.charging == 2) // If the cell was full
-							A.charging = 1 // It's no longer full
-				if(drained >= drain_rate)
+						var/cell_drain = min(drain_energy_left, A.cell.charge, 50e3) // Upper limit of 50kJ per APC to distribute the load
+
+						A.cell.charge -= cell_drain
+						power_drained += cell_drain
+						drain_energy_left -= cell_drain
+
+						// Set APC to charging if it's fully charged
+						if(A.charging == 2)
+							A.charging = 1
+
+				if(drain_energy_left <= 0)
 					break
 
 	if(power_drained > max_power * 0.98)
-		if (!admins_warned)
+		if(!admins_warned)
 			admins_warned = TRUE
 			message_admins("Power sink at ([x],[y],[z] - <A HREF='?_src_=holder;[HrefToken()];adminplayerobservecoodjump=1;X=[x];Y=[y];Z=[z]'>JMP</a>) is 95% full. Explosion imminent.")
 		playsound(src, 'sound/effects/screech.ogg', 100, TRUE, TRUE)

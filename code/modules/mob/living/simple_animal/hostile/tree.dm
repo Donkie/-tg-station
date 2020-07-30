@@ -96,13 +96,13 @@
 	if(M.a_intent == "help")
 		visible_message("<span class='warning'>[src] crackles with static electricity!</span>")
 		for(var/obj/item/stock_parts/cell/C in range(2, get_turf(src)))
-			C.give(75)
+			C.give(75e3)
 		for(var/mob/living/silicon/robot/R in range(2, get_turf(src)))
 			if(R.cell)
-				R.cell.give(75)
+				R.cell.give(75e3)
 		for(var/obj/machinery/power/apc/A in range(2, get_turf(src)))
 			if(A.cell)
-				A.cell.give(75)
+				A.cell.give(75e3)
 
 /mob/living/simple_animal/hostile/tree/festivus/add_cell_sample()
 	return

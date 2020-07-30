@@ -12,7 +12,7 @@
 	var/initialized_button = 0
 	armor = list(MELEE = 50, BULLET = 50, LASER = 50, ENERGY = 50, BOMB = 10, BIO = 100, RAD = 100, FIRE = 90, ACID = 70)
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 2
+	idle_power_usage = 1
 	resistance_flags = LAVA_PROOF | FIRE_PROOF
 
 /obj/machinery/button/indestructible
@@ -171,7 +171,7 @@
 		flick("[skin]-denied", src)
 		return
 
-	use_power(5)
+	use_energy(5)
 	icon_state = "[skin]1"
 
 	if(device)

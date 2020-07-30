@@ -35,13 +35,13 @@
 	///What direction will the mech face when entered/powered on? Defaults to South.
 	var/dir_in = SOUTH
 	///How much energy the mech will consume each time it moves. This variable is a backup for when leg actuators affect the energy drain.
-	var/normal_step_energy_drain = 10
+	var/normal_step_energy_drain = 10e3
 	///How much energy the mech will consume each time it moves. this is the current active energy consumed
-	var/step_energy_drain = 10
+	var/step_energy_drain = 10e3
 	///How much energy we drain each time we mechpunch someone
-	var/melee_energy_drain = 15
+	var/melee_energy_drain = 15e3
 	///The minimum amount of energy charge consumed by leg overload
-	var/overload_step_energy_drain_min = 100
+	var/overload_step_energy_drain_min = 100e3
 	///chance to deflect the incoming projectiles, hits, or lesser the effect of ex_act.
 	var/deflect_chance = 10
 	///Modifiers for directional armor
@@ -153,7 +153,7 @@
 	///Bool for if the mech is currently phasing
 	var/phasing = FALSE
 	///Power we use every time we phaze through something
-	var/phasing_energy_drain = 200
+	var/phasing_energy_drain = 200e3
 	///icon_state for flick() when phazing
 	var/phase_state = ""
 
@@ -265,10 +265,10 @@
 
 /obj/vehicle/sealed/mecha/proc/update_part_values() ///Updates the values given by scanning module and capacitor tier, called when a part is removed or inserted.
 	if(scanmod)
-		normal_step_energy_drain = 20 - (5 * scanmod.rating) //10 is normal, so on lowest part its worse, on second its ok and on higher its real good up to 0 on best
+		normal_step_energy_drain = 20e3 - (5e3 * scanmod.rating) //10 is normal, so on lowest part its worse, on second its ok and on higher its real good up to 0 on best
 		step_energy_drain = normal_step_energy_drain
 	else
-		normal_step_energy_drain = 500
+		normal_step_energy_drain = 500e3
 		step_energy_drain = normal_step_energy_drain
 	if(capacitor)
 		armor = armor.modifyRating(energy = (capacitor.rating * 5)) //Each level of capacitor protects the mech against emp by 5%
@@ -406,8 +406,8 @@
 		if(internal_damage & MECHA_INT_SHORT_CIRCUIT)
 			if(get_charge())
 				spark_system.start()
-				cell.charge -= min(10 * delta_time, cell.charge)
-				cell.maxcharge -= min(10 * delta_time, cell.maxcharge)
+				cell.charge -= min(10e3 * delta_time, cell.charge)
+				cell.maxcharge -= min(10e3 * delta_time, cell.maxcharge)
 
 	if(internal_temp_regulation)
 		if(cabin_air && cabin_air.return_volume() > 0)
@@ -481,8 +481,7 @@
 				checking = checking.loc
 
 	if(mecha_flags & LIGHTS_ON)
-		var/lights_energy_drain = 2
-		use_power(lights_energy_drain*delta_time)
+		use_energy(MECHA_LIGHTSPOWER * delta_time)
 
 	for(var/b in occupants)
 		var/mob/living/occupant = b
@@ -651,7 +650,7 @@
 			to_chat(occupants, "[icon2html(src, occupants)]<span class='warning'>Missing [scanmod? "capacitor" : "scanning module"].</span>")
 			TIMER_COOLDOWN_START(src, COOLDOWN_MECHA_MESSAGE, 2 SECONDS)
 		return FALSE
-	if(!use_power(step_energy_drain))
+	if(!use_energy(step_energy_drain))
 		if(!TIMER_COOLDOWN_CHECK(src, COOLDOWN_MECHA_MESSAGE))
 			to_chat(occupants, "[icon2html(src, occupants)]<span class='warning'>Insufficient power to move!</span>")
 			TIMER_COOLDOWN_START(src, COOLDOWN_MECHA_MESSAGE, 2 SECONDS)
@@ -705,7 +704,7 @@
 			spark_system.start()
 		else
 			forceMove(destination)//This is jank I hate it thanks, this should be done thrugh move not this dumb shit
-		use_power(phasing_energy_drain)
+		use_energy(phasing_energy_drain)
 		addtimer(VARSET_CALLBACK(src, movedelay, TRUE), movedelay*3)
 		return
 	. = ..()
@@ -1149,9 +1148,15 @@
 ///// Power stuff /////
 ///////////////////////
 
-/obj/vehicle/sealed/mecha/proc/has_charge(amount)
-	return (get_charge()>=amount)
+/**
+  * Returns true if the internal cell has at least the specified amount of energy
+  */
+/obj/vehicle/sealed/mecha/proc/has_charge(energy)
+	return get_charge() >= energy
 
+/**
+  * Returns how much energy the internal cell has, in joules
+  */
 /obj/vehicle/sealed/mecha/proc/get_charge()
 	for(var/obj/item/mecha_parts/mecha_equipment/tesla_energy_relay/R in equipment)
 		var/relay_charge = R.get_charge()
@@ -1160,16 +1165,21 @@
 	if(cell)
 		return max(0, cell.charge)
 
-/obj/vehicle/sealed/mecha/proc/use_power(amount)
-	if(get_charge() && cell.use(amount))
+/**
+  * Consumes energy from the internal cell
+  */
+/obj/vehicle/sealed/mecha/proc/use_energy(energy)
+	if(get_charge() && cell.use(energy))
 		return TRUE
 	return FALSE
 
-/obj/vehicle/sealed/mecha/proc/give_power(amount)
+/**
+  * Charge the internal cell, in joules. Returns the amount of joules actually charged.
+  */
+/obj/vehicle/sealed/mecha/proc/give_energy(energy)
 	if(!isnull(get_charge()))
-		cell.give(amount)
-		return TRUE
-	return FALSE
+		return cell.give(energy)
+	return 0
 
 ///////////////////////
 ////// Ammo stuff /////

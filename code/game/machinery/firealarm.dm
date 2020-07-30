@@ -20,8 +20,8 @@
 	integrity_failure = 0.4
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 100, RAD = 100, FIRE = 90, ACID = 30)
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 2
-	active_power_usage = 6
+	idle_power_usage = 1
+	active_power_usage = 3
 	power_channel = AREA_USAGE_ENVIRON
 	resistance_flags = FIRE_PROOF
 
@@ -247,7 +247,7 @@
 
 				else if(istype(W, /obj/item/electroadaptive_pseudocircuit))
 					var/obj/item/electroadaptive_pseudocircuit/P = W
-					if(!P.adapt_circuit(user, 15))
+					if(!P.adapt_circuit(user, 15e3))
 						return
 					user.visible_message("<span class='notice'>[user] fabricates a circuit and places it into [src].</span>", \
 					"<span class='notice'>You adapt a fire alarm circuit and slot it into the assembly.</span>")

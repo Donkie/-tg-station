@@ -1,18 +1,11 @@
 // the SMES
 // stores power
 
-#define SMESRATE 0.05			// rate of internal charge to external power
+/// The SMES gets magically more energy capacity than the summed capacity of the cells it contains. This factor determines how much.
+#define SMES_ENERGY_CELL_FACTOR (40/15)
 
-//Cache defines
-#define SMES_CLEVEL_1		1
-#define SMES_CLEVEL_2		2
-#define SMES_CLEVEL_3		3
-#define SMES_CLEVEL_4		4
-#define SMES_CLEVEL_5		5
-#define SMES_OUTPUTTING		6
-#define SMES_NOT_OUTPUTTING 7
-#define SMES_INPUTTING		8
-#define SMES_INPUT_ATTEMPT	9
+/// Initial charge to give the engineering SMES units, in joules
+#define SMES_ENGINEERING_INITCHARGE 60e6
 
 /obj/machinery/power/smes
 	name = "power storage unit"
@@ -22,20 +15,20 @@
 	use_power = NO_POWER_USE
 	circuit = /obj/item/circuitboard/machine/smes
 
-	var/capacity = 5e6 // maximum charge
-	var/charge = 0 // actual charge
+	var/capacity = 0 /// Maximum charge in joules. This value is calculated from the cell components, so you cannot set it here.
+	var/charge = 0 /// Actual charge in joules.
 
-	var/input_attempt = TRUE // TRUE = attempting to charge, FALSE = not attempting to charge
-	var/inputting = TRUE // TRUE = actually inputting, FALSE = not inputting
-	var/input_level = 50000 // amount of power the SMES attempts to charge by
-	var/input_level_max = 200000 // cap on input_level
-	var/input_available = 0 // amount of charge available from input last tick
+	var/input_attempt = TRUE /// Should we attempt to charge or not
+	var/inputting = TRUE /// Are we charging or not
+	var/input_level = 50e3 /// Amount of power the SMES should attempt to charge by, in watts
+	var/input_level_max = 200e3 /// cap on input_level, in watts
+	var/input_available = 0 /// amount of power available from input last tick, in watts
 
-	var/output_attempt = TRUE // TRUE = attempting to output, FALSE = not attempting to output
-	var/outputting = TRUE // TRUE = actually outputting, FALSE = not outputting
-	var/output_level = 50000 // amount of power the SMES attempts to output
-	var/output_level_max = 200000 // cap on output_level
-	var/output_used = 0 // amount of power actually outputted. may be less than output_level if the powernet returns excess power
+	var/output_attempt = TRUE /// Should we attempt to output or not
+	var/outputting = TRUE /// Are we outputting or not
+	var/output_level = 50e3 /// Amount of power the SMES should attempt to output, in watts
+	var/output_level_max = 200e3 /// cap on output_level, in watts
+	var/output_used = 0 /// Amount of power actually outputted, in watts. May be less than output_level if the powernet returns excess power
 
 	var/obj/machinery/power/terminal/terminal = null
 
@@ -61,19 +54,19 @@
 	update_icon()
 
 /obj/machinery/power/smes/RefreshParts()
-	var/IO = 0
-	var/MC = 0
-	var/C
-	for(var/obj/item/stock_parts/capacitor/CP in component_parts)
-		IO += CP.rating
-	input_level_max = initial(input_level_max) * IO
-	output_level_max = initial(output_level_max) * IO
+	var/obj/item/stock_parts/capacitor/cap = locate() in component_parts
+	var/cap_rating = cap ? cap.rating : 0
+	input_level_max = initial(input_level_max) * cap_rating
+	output_level_max = initial(output_level_max) * cap_rating
+
+	var/tot_cell_capacity = 0
+	var/tot_cell_charge = 0
 	for(var/obj/item/stock_parts/cell/PC in component_parts)
-		MC += PC.maxcharge
-		C += PC.charge
-	capacity = MC / (15000) * 1e6
+		tot_cell_capacity += PC.maxcharge
+		tot_cell_charge += PC.charge
+	capacity = tot_cell_capacity * SMES_ENERGY_CELL_FACTOR
 	if(!initial(charge) && !charge)
-		charge = C / 15000 * 1e6
+		charge = tot_cell_charge * SMES_ENERGY_CELL_FACTOR
 
 /obj/machinery/power/smes/should_have_node()
 	return TRUE
@@ -222,14 +215,16 @@
 		. += "smes-oc0"
 
 	var/clevel = chargedisplay()
-	if(clevel>0)
+	if(clevel > 0)
 		. += "smes-og[clevel]"
 
-
+/**
+  * Returns which icon overlay to use for the charge level
+  */
 /obj/machinery/power/smes/proc/chargedisplay()
-	return clamp(round(5.5*charge/capacity),0,5)
+	return clamp(round(5.5 * charge / capacity), 0, 5)
 
-/obj/machinery/power/smes/process()
+/obj/machinery/power/smes/process(delta_time)
 	if(machine_stat & BROKEN)
 		return
 
@@ -243,37 +238,38 @@
 		input_available = terminal.surplus()
 
 		if(inputting)
-			if(input_available > 0)		// if there's power available, try to charge
+			if(input_available > 0)
+				// Powernet has a surplus, charge
 
-				var/load = min(min((capacity-charge)/SMESRATE, input_level), input_available)		// charge at set rate, limited to spare capacity
+				// Try to charge at `input_level` power, but limit it both such that we don't overcharge, and so we don't take more than the powernet has available
+				var/load = min(input_level, (capacity - charge) / delta_time, input_available)
 
-				charge += load * SMESRATE	// increase the charge
+				charge += load * delta_time
 
-				terminal.add_load(load) // add the load to the terminal side network
-
-			else					// if not enough capcity
-				inputting = FALSE		// stop inputting
-
-		else
-			if(input_attempt && input_available > 0)
-				inputting = TRUE
+				terminal.add_load(load)
+			else
+				// Powernet does not have a surplus, stop charging
+				inputting = FALSE
+		else if(input_available > 0)
+			// Delay actual charging until next cycle
+			inputting = TRUE
 	else
 		inputting = FALSE
 
-	//outputting
+	// Outputting
 	if(output_attempt)
 		if(outputting)
-			output_used = min( charge/SMESRATE, output_level)		//limit output to that stored
+			output_used = min(charge / delta_time, output_level) //limit output to that stored
 
-			if (add_avail(output_used))				// add output to powernet if it exists (smes side)
-				charge -= output_used*SMESRATE		// reduce the storage (may be recovered in /restore() if excessive)
+			if(add_avail(output_used)) // add output to powernet if it exists (smes side)
+				charge -= output_used * delta_time // reduce the storage (may be recovered in /restore() if excessive)
 			else
 				outputting = FALSE
 
-			if(output_used < 0.0001)		// either from no charge or set to 0
+			if(output_used < 0.0001) // either from no charge or set to 0
 				outputting = FALSE
 				investigate_log("lost power and turned <font color='red'>off</font>", INVESTIGATE_SINGULO)
-		else if(output_attempt && charge > output_level && output_level > 0)
+		else if(output_level > 0 && (charge / delta_time) > output_level)
 			outputting = TRUE
 		else
 			output_used = 0
@@ -285,10 +281,9 @@
 		update_icon()
 
 
-
 // called after all power processes are finished
-// restores charge level to smes if there was excess this ptick
-/obj/machinery/power/smes/proc/restore()
+// restores charge level to smes if there was excess this cycle
+/obj/machinery/power/smes/proc/restore(delta_time)
 	if(machine_stat & BROKEN)
 		return
 
@@ -296,22 +291,22 @@
 		output_used = 0
 		return
 
-	var/excess = powernet.netexcess		// this was how much wasn't used on the network last ptick, minus any removed by other SMESes
+	var/excess = powernet.netexcess // this was how much wasn't used on the network last cycle, minus any removed by other SMESes
 
-	excess = min(output_used, excess)				// clamp it to how much was actually output by this SMES last ptick
+	excess = min(output_used, excess) // clamp it to how much was actually output by this SMES last cycle
 
-	excess = min((capacity-charge)/SMESRATE, excess)	// for safety, also limit recharge by space capacity of SMES (shouldn't happen)
+	excess = min((capacity - charge) / delta_time, excess) // for safety, also limit recharge by space capacity of SMES (shouldn't happen)
 
 	// now recharge this amount
 
 	var/clev = chargedisplay()
 
-	charge += excess * SMESRATE			// restore unused power
-	powernet.netexcess -= excess		// remove the excess from the powernet, so later SMESes don't try to use it
+	charge += excess * delta_time // restore unused power
+	powernet.netexcess -= excess // remove the excess from the powernet, so later SMESes don't try to use it
 
 	output_used -= excess
 
-	if(clev != chargedisplay() ) //if needed updates the icons overlay
+	if(clev != chargedisplay()) //if needed updates the icons overlay
 		update_icon()
 	return
 
@@ -325,18 +320,16 @@
 /obj/machinery/power/smes/ui_data()
 	var/list/data = list(
 		"capacity" = capacity,
-		"capacityPercent" = round(100*charge/capacity, 0.1),
+		"capacityPercent" = round(100 * charge / capacity, 0.1),
 		"charge" = charge,
 		"inputAttempt" = input_attempt,
 		"inputting" = inputting,
 		"inputLevel" = input_level,
-		"inputLevel_text" = DisplayPower(input_level),
 		"inputLevelMax" = input_level_max,
 		"inputAvailable" = input_available,
 		"outputAttempt" = output_attempt,
 		"outputting" = outputting,
 		"outputLevel" = output_level,
-		"outputLevel_text" = DisplayPower(output_level),
 		"outputLevelMax" = output_level_max,
 		"outputUsed" = output_used,
 	)
@@ -415,7 +408,7 @@
 	log_smes()
 
 /obj/machinery/power/smes/engineering
-	charge = 1.5e6 // Engineering starts with some charge for singulo
+	charge = SMES_ENGINEERING_INITCHARGE
 
 /obj/machinery/power/smes/magical
 	name = "magical power storage unit"
@@ -427,14 +420,5 @@
 	..()
 
 
-#undef SMESRATE
-
-#undef SMES_CLEVEL_1
-#undef SMES_CLEVEL_2
-#undef SMES_CLEVEL_3
-#undef SMES_CLEVEL_4
-#undef SMES_CLEVEL_5
-#undef SMES_OUTPUTTING
-#undef SMES_NOT_OUTPUTTING
-#undef SMES_INPUTTING
-#undef SMES_INPUT_ATTEMPT
+#undef SMES_ENERGY_CELL_FACTOR
+#undef SMES_ENGINEERING_INITCHARGE

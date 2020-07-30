@@ -52,7 +52,7 @@
 	var/report_delivery = TRUE /// true if bot will announce an arrival to a location.
 
 	var/obj/item/stock_parts/cell/cell /// Internal Powercell
-	var/cell_move_power_usage = 1///How much power we use when we move.
+	var/cell_move_power_usage = 1e3 /// How much energy we use when we move, in joules.
 	var/bloodiness = 0 ///If we've run over a mob, how many tiles will we leave tracks on while moving
 	var/num_steps = 0 ///The amount of steps we should take until we rest for a time.
 
@@ -67,7 +67,7 @@
 	var/datum/job/cargo_tech/J = new/datum/job/cargo_tech
 	access_card.access = J.get_access()
 	prev_access = access_card.access
-	cell = new /obj/item/stock_parts/cell/upgraded(src, 2000)
+	cell = new /obj/item/stock_parts/cell/upgraded(src, 2e6)
 
 	var/static/mulebot_count = 0
 	mulebot_count += 1
@@ -502,7 +502,7 @@
 /mob/living/simple_animal/bot/mulebot/get_status_tab_items()
 	. = ..()
 	if(cell)
-		. += "Charge Left: [cell.charge]/[cell.maxcharge]"
+		. += "Charge Left: [siunit(cell.charge, "J", 0.1)]/[siunit(cell.maxcharge, "J", 0.1)]"
 	else
 		. += text("No Cell Inserted!")
 	if(load)

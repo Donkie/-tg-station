@@ -14,7 +14,7 @@
 	wreckage = /obj/structure/mecha_wreckage/gygax
 	internal_damage_threshold = 35
 	max_equip = 3
-	step_energy_drain = 3
+	step_energy_drain = 3e3
 
 /obj/vehicle/sealed/mecha/combat/gygax/dark
 	desc = "A lightweight exosuit, painted in a dark scheme. This model appears to have some modifications."

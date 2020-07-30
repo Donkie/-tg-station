@@ -21,7 +21,7 @@ Borg Hypospray
 	volume = 30
 	possible_transfer_amounts = list()
 	var/mode = 1
-	var/charge_cost = 50
+	var/charge_cost = 50e3 /// Energy consumption on each regeneration, in joules
 	var/charge_timer = 0
 	var/recharge_time = 10 //Time it takes for shots to recharge (in seconds)
 	var/bypass_protection = 0 //If the hypospray can go through armor or thick material
@@ -182,7 +182,7 @@ Borg Hypospray
 	name = "syndicate cyborg hypospray"
 	desc = "An experimental piece of Syndicate technology used to produce powerful restorative nanites used to very quickly restore injuries of all types. Also metabolizes potassium iodide for radiation poisoning, inacusiate for ear damage and morphine for offense."
 	icon_state = "borghypo_s"
-	charge_cost = 20
+	charge_cost = 20e3
 	recharge_time = 2
 	reagent_ids = list(
 		/datum/reagent/medicine/syndicate_nanites,
@@ -202,7 +202,7 @@ Borg Shaker
 	icon = 'icons/obj/drinks.dmi'
 	icon_state = "shaker"
 	possible_transfer_amounts = list(5,10,20)
-	charge_cost = 20 //Lots of reagents all regenerating at once, so the charge cost is lower. They also regenerate faster.
+	charge_cost = 20e3 //Lots of reagents all regenerating at once, so the charge cost is lower. They also regenerate faster.
 	recharge_time = 3
 	accepts_reagent_upgrades = FALSE
 
@@ -269,7 +269,7 @@ Borg Shaker
 	icon = 'icons/obj/drinks.dmi'
 	icon_state = "threemileislandglass"
 	possible_transfer_amounts = list(5,10,20)
-	charge_cost = 20 //Lots of reagents all regenerating at once, so the charge cost is lower. They also regenerate faster.
+	charge_cost = 20e3 //Lots of reagents all regenerating at once, so the charge cost is lower. They also regenerate faster.
 	recharge_time = 3
 	accepts_reagent_upgrades = FALSE
 

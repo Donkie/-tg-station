@@ -35,39 +35,74 @@
 /obj/machinery/power/proc/should_have_node()
 	return FALSE
 
-/obj/machinery/power/proc/add_avail(amount)
+/**
+  * Supply power to the powernet. Returns TRUE if there was a powernet to supply power to, otherwise FALSE.
+  *
+  * Arguments:
+  * * power - The power to supply, in watts
+  */
+/obj/machinery/power/proc/add_avail(power)
 	if(powernet)
-		powernet.newavail += amount
+		powernet.newavail += power
 		return TRUE
 	else
 		return FALSE
 
-/obj/machinery/power/proc/add_load(amount)
+/**
+  * Drain power from the powernet. Used for machines.
+  *
+  * Arguments:
+  * * power - The power to drain, in watts
+  */
+/obj/machinery/power/proc/add_load(power)
 	if(powernet)
-		powernet.load += amount
+		powernet.load += power
 
+/**
+  * Returns the amount of power available on the grid, in watts. Used for machines.
+  *
+  * Returns 0 if not attached to any grid
+  */
 /obj/machinery/power/proc/surplus()
 	if(powernet)
-		return clamp(powernet.avail-powernet.load, 0, powernet.avail)
+		return clamp(powernet.avail - powernet.load, 0, powernet.avail)
 	else
 		return 0
 
-/obj/machinery/power/proc/avail(amount)
+/**
+  * If `power` is supplied, returns TRUE/FALSE if the powernet can supply that load.
+  * If `power` is not supplied, returns the total supplied power to the grid, excluding any loads.
+  */
+/obj/machinery/power/proc/avail(power)
 	if(powernet)
-		return amount ? powernet.avail >= amount : powernet.avail
+		return power ? powernet.avail >= power : powernet.avail
 	else
 		return 0
 
-/obj/machinery/power/proc/add_delayedload(amount)
+/**
+  * Drain power from the powernet on the next powernet cycle. Used for non-machines.
+  *
+  * Arguments:
+  * * power - The power to drain, in watts
+  */
+/obj/machinery/power/proc/add_delayedload(power)
 	if(powernet)
-		powernet.delayedload += amount
+		powernet.delayedload += power
 
+/**
+  * Returns the amount of power available on the grid for the next powernet cycle, in watts. Used for non-machines.
+  *
+  * Returns 0 if not attached to any grid
+  */
 /obj/machinery/power/proc/delayed_surplus()
 	if(powernet)
 		return clamp(powernet.newavail - powernet.delayedload, 0, powernet.newavail)
 	else
 		return 0
 
+/**
+  * Returns the total supplied power to the grid, excluding any loads.
+  */
 /obj/machinery/power/proc/newavail()
 	if(powernet)
 		return powernet.newavail
@@ -77,89 +112,65 @@
 /obj/machinery/power/proc/disconnect_terminal() // machines without a terminal will just return, no harm no fowl.
 	return
 
-// returns true if the area has power on given channel (or doesn't require power).
-// defaults to power_channel
-/obj/machinery/proc/powered(chan = -1) // defaults to power_channel
+/**
+  * Returns TRUE if the area has power on the given channel, or if this machine doesn't require power.
+  *
+  * Arguments:
+  * * chan - The power channel, defaults to the `power_channel` var.
+  */
+/obj/machinery/proc/powered(chan = -1)
 	if(!loc)
 		return FALSE
-	if(!use_power)
+	if(use_power == NO_POWER_USE)
 		return TRUE
 
-	var/area/A = get_area(src)		// make sure it's in an area
+	var/area/A = get_area(src)
 	if(!A)
-		return FALSE					// if not, then not powered
+		return FALSE
+
 	if(chan == -1)
 		chan = power_channel
-	return A.powered(chan)	// return power status of the area
 
-// increment the power usage stats for an area
-/obj/machinery/proc/use_power(amount, chan = -1) // defaults to power_channel
+	return A.powered(chan)
+
+/**
+  * Consumes energy from the area's APC
+  *
+  * Arguments:
+  * * energy: The energy to consume, in joules.
+  * * chan: The channel which the energy will be drawn from. Any of the AREA_USAGE_* consts. Defaults to the power_channel of the machine.
+  */
+/obj/machinery/proc/use_energy(energy, chan = -1) // defaults to power_channel
 	var/area/A = get_area(src)		// make sure it's in an area
 	if(!A)
 		return
 	if(chan == -1)
 		chan = power_channel
-	A.use_power(amount, chan)
+	A.use_energy(energy, chan)
+
 
 /**
- * An alternative to 'use_power', this proc directly costs the APC in direct charge, as opposed to being calculated periodically.
- * - Amount: How much power the APC's cell is to be costed.
- */
-/obj/machinery/proc/directly_use_power(amount)
-	var/area/A = get_area(src)
-	var/obj/machinery/power/apc/local_apc
-	if(!A)
-		return FALSE
-	local_apc = A.get_apc()
-	if(!local_apc)
-		return FALSE
-	if(!local_apc.cell)
-		return FALSE
-	local_apc.cell.use(amount)
-	return TRUE
-
-/**
- * Attempts to draw power directly from the APC's Powernet rather than the APC's battery. For high-draw machines, like the cell charger
- *
- * Checks the surplus power on the APC's powernet, and compares to the requested amount. If the requested amount is available, this proc
- * will add the amount to the APC's usage and return that amount. Otherwise, this proc will return FALSE.
- * If the take_any var arg is set to true, this proc will use and return any surplus that is under the requested amount, assuming that
- * the surplus is above zero.
- * Args:
- * - amount, the amount of power requested from the Powernet. In standard loosely-defined SS13 power units.
- * - take_any, a bool of whether any amount of power is acceptable, instead of all or nothing. Defaults to FALSE
- */
-/obj/machinery/proc/use_power_from_net(amount, take_any = FALSE)
-	if(amount <= 0) //just in case
-		return FALSE
-	var/area/home = get_area(src)
-
-	if(!home)
-		return FALSE //apparently space isn't an area
-	if(!home.requires_power)
-		return amount //Shuttles get free power, don't ask why
-
-	var/obj/machinery/power/apc/local_apc = home?.get_apc()
-	if(!local_apc)
-		return FALSE
-	var/surplus = local_apc.surplus()
-	if(surplus <= 0) //I don't know if powernet surplus can ever end up negative, but I'm just gonna failsafe it
-		return FALSE
-	if(surplus < amount)
-		if(!take_any)
-			return FALSE
-		amount = surplus
-	local_apc.add_load(amount)
-	return amount
-
-/obj/machinery/proc/addStaticPower(value, powerchannel)
+  * Add a static amount of power load to an area
+  *
+  * Arguments:
+  * * power: The power of the load, in watts.
+  * * powerchannel: The channel which the energy will be drawn from. Any of the AREA_USAGE_* consts.
+  */
+/obj/machinery/proc/add_power_load(power, powerchannel)
 	var/area/A = get_area(src)
 	if(!A)
 		return
-	A.addStaticPower(value, powerchannel)
+	A.add_power_load(power, powerchannel)
 
-/obj/machinery/proc/removeStaticPower(value, powerchannel)
-	addStaticPower(-value, powerchannel)
+/**
+  * Remove a static amount of power load to an area
+  *
+  * Arguments:
+  * * power: The power of the load, in watts.
+  * * powerchannel: The channel which the energy will be drawn from. Any of the AREA_USAGE_* consts.
+  */
+/obj/machinery/proc/remove_power_load(power, powerchannel)
+	add_power_load(-power, powerchannel)
 
 /**
  * Called whenever the power settings of the containing area change
@@ -404,10 +415,10 @@
 
 	if (isarea(power_source))
 		var/area/source_area = power_source
-		source_area.use_power(drained_energy/GLOB.CELLRATE)
+		source_area.use_energy(drained_energy)
 	else if (istype(power_source, /datum/powernet))
-		var/drained_power = drained_energy/GLOB.CELLRATE //convert from "joules" to "watts"
-		PN.delayedload += (min(drained_power, max(PN.newavail - PN.delayedload, 0)))
+		var/drained_power = drained_energy / SSMACHINES_DT
+		PN.delayedload += min(drained_power, max(PN.newavail - PN.delayedload, 0))
 	else if (istype(power_source, /obj/item/stock_parts/cell))
 		cell.use(drained_energy)
 	return drained_energy

@@ -1,4 +1,6 @@
-#define THERMAL_REGULATOR_COST 18 // the cost per tick for the thermal regulator
+
+/// The power consumption of the thermal regulator, in watts
+#define THERMAL_REGULATOR_COST 9e3
 
 //Note: Everything in modules/clothing/spacesuits should have the entire suit grouped together.
 //      Meaning the the suit is defined directly after the corrisponding helmet. Just like below!
@@ -72,7 +74,7 @@
 		human.update_spacesuit_hud_icon("0")
 
 // Space Suit temperature regulation and power usage
-/obj/item/clothing/suit/space/process()
+/obj/item/clothing/suit/space/process(delta_time)
 	var/mob/living/carbon/human/user = src.loc
 	if(!user || !ishuman(user) || !(user.wear_suit == src))
 		return
@@ -89,7 +91,7 @@
 		return
 
 	// cell.use will return FALSE if charge is lower than THERMAL_REGULATOR_COST
-	if(!cell.use(THERMAL_REGULATOR_COST))
+	if(!cell.use(THERMAL_REGULATOR_COST * delta_time))
 		toggle_spacesuit()
 		update_hud_icon(user)
 		to_chat(user, "<span class='warning'>The thermal regulator cuts off as [cell] runs out of charge.</span>")
@@ -201,7 +203,7 @@
 	// charge that cell. If it's too low, we shouldn't bother with setting the
 	// thermal protection value and should just return out early.
 	var/mob/living/carbon/human/user = src.loc
-	if(!thermal_on && !(cell && cell.charge >= THERMAL_REGULATOR_COST))
+	if(!thermal_on && !(cell && cell.charge >= (THERMAL_REGULATOR_COST * SSOBJ_DT)))
 		to_chat(user, "<span class='warning'>The thermal regulator on \the [src] has no charge.</span>")
 		return
 
@@ -232,7 +234,7 @@
 	// Check if there's enough charge to trigger a thermal regulator tick and
 	// if there is, whethere the cell's capacity indicates high, medium or low
 	// charge based on it.
-	if(cell.charge >= THERMAL_REGULATOR_COST)
+	if(cell.charge >= (THERMAL_REGULATOR_COST * SSOBJ_DT))
 		if(cell_percent > 60)
 			human.update_spacesuit_hud_icon("high")
 			return

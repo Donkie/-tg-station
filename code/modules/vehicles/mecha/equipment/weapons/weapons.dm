@@ -60,7 +60,7 @@
 	name = "\improper CH-PS \"Immolator\" laser"
 	desc = "A weapon for combat exosuits. Shoots basic lasers."
 	icon_state = "mecha_laser"
-	energy_drain = 30
+	energy_drain = 30e3
 	projectile = /obj/projectile/beam/laser
 	fire_sound = 'sound/weapons/laser.ogg'
 	harmful = TRUE
@@ -70,7 +70,7 @@
 	name = "\improper CH-DS \"Peacemaker\" disabler"
 	desc = "A weapon for combat exosuits. Shoots basic disablers."
 	icon_state = "mecha_disabler"
-	energy_drain = 30
+	energy_drain = 30e3
 	projectile = /obj/projectile/beam/disabler
 	fire_sound = 'sound/weapons/taser2.ogg'
 
@@ -79,7 +79,7 @@
 	name = "\improper CH-LC \"Solaris\" laser cannon"
 	desc = "A weapon for combat exosuits. Shoots heavy lasers."
 	icon_state = "mecha_laser"
-	energy_drain = 60
+	energy_drain = 60e3
 	projectile = /obj/projectile/beam/laser/heavylaser
 	fire_sound = 'sound/weapons/lasercannonfire.ogg'
 
@@ -88,7 +88,7 @@
 	name = "\improper MKIV ion heavy cannon"
 	desc = "A weapon for combat exosuits. Shoots technology-disabling ion beams. Don't catch yourself in the blast!"
 	icon_state = "mecha_ion"
-	energy_drain = 120
+	energy_drain = 120e3
 	projectile = /obj/projectile/ion
 	fire_sound = 'sound/weapons/laser.ogg'
 
@@ -97,7 +97,7 @@
 	name = "\improper MKI Tesla Cannon"
 	desc = "A weapon for combat exosuits. Fires bolts of electricity similar to the experimental tesla engine."
 	icon_state = "mecha_ion"
-	energy_drain = 500
+	energy_drain = 500e3
 	projectile = /obj/projectile/energy/tesla/cannon
 	fire_sound = 'sound/magic/lightningbolt.ogg'
 	harmful = TRUE
@@ -107,7 +107,7 @@
 	name = "eZ-13 MK2 heavy pulse rifle"
 	desc = "A weapon for combat exosuits. Shoots powerful destructive blasts capable of demolishing obstacles."
 	icon_state = "mecha_pulse"
-	energy_drain = 120
+	energy_drain = 120e3
 	projectile = /obj/projectile/beam/pulse/heavy
 	fire_sound = 'sound/weapons/marauder.ogg'
 	harmful = TRUE
@@ -120,7 +120,7 @@
 	inhand_icon_state = "plasmacutter"
 	lefthand_file = 'icons/mob/inhands/weapons/guns_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/weapons/guns_righthand.dmi'
-	energy_drain = 30
+	energy_drain = 30e3
 	projectile = /obj/projectile/plasma/adv/mech
 	fire_sound = 'sound/weapons/plasma_cutter.ogg'
 	harmful = TRUE
@@ -136,7 +136,7 @@
 	name = "\improper PBT \"Pacifier\" mounted taser"
 	desc = "A weapon for combat exosuits. Shoots non-lethal stunning electrodes."
 	icon_state = "mecha_taser"
-	energy_drain = 20
+	energy_drain = 20e3
 	equip_cooldown = 8
 	projectile = /obj/projectile/energy/electrode
 	fire_sound = 'sound/weapons/taser.ogg'
@@ -146,7 +146,7 @@
 	name = "\improper HoNkER BlAsT 5000"
 	desc = "Equipment for clown exosuits. Spreads fun and joy to everyone around. Honk!"
 	icon_state = "mecha_honker"
-	energy_drain = 200
+	energy_drain = 200e3
 	equip_cooldown = 150
 	range = MECHA_MELEE|MECHA_RANGED
 	kickback = FALSE
@@ -221,7 +221,7 @@
 			while(chassis.get_charge() >= projectile_energy_cost && projectiles_to_add)
 				projectiles++
 				projectiles_to_add--
-				chassis.use_power(projectile_energy_cost)
+				chassis.use_energy(projectile_energy_cost)
 
 		else
 			if(!projectiles_cache)
@@ -435,7 +435,7 @@
 	name = "\improper Oingo Boingo Punch-face"
 	desc = "Equipment for clown exosuits. Delivers fun right to your face!"
 	icon_state = "mecha_punching_glove"
-	energy_drain = 250
+	energy_drain = 250e3
 	equip_cooldown = 20
 	range = MECHA_MELEE|MECHA_RANGED
 	missile_range = 5

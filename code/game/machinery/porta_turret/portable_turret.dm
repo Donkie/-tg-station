@@ -33,8 +33,8 @@ DEFINE_BITFIELD(turret_flags, list(
 	density = TRUE
 	desc = "A covered turret that shoots at its enemies."
 	use_power = IDLE_POWER_USE				//this turret uses and requires power
-	idle_power_usage = 50		//when inactive, this turret takes up constant 50 Equipment power
-	active_power_usage = 300	//when active, this turret takes up constant 300 Equipment power
+	idle_power_usage = 25		//when inactive, this turret takes up constant 50 Equipment power
+	active_power_usage = 150	//when active, this turret takes up constant 300 Equipment power
 	req_access = list(ACCESS_SECURITY) /// Only people with Security access
 	power_channel = AREA_USAGE_EQUIP	//drains power from the EQUIPMENT channel
 	max_integrity = 160		//the turret's health
@@ -600,11 +600,11 @@ DEFINE_BITFIELD(turret_flags, list(
 	var/obj/projectile/A
 	//any emagged turrets drains 2x power and uses a different projectile?
 	if(mode == TURRET_STUN)
-		use_power(reqpower)
+		use_energy(reqpower)
 		A = new stun_projectile(T)
 		playsound(loc, stun_projectile_sound, 75, TRUE)
 	else
-		use_power(reqpower * 2)
+		use_energy(reqpower * 2)
 		A = new lethal_projectile(T)
 		playsound(loc, lethal_projectile_sound, 75, TRUE)
 

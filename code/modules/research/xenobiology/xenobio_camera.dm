@@ -291,7 +291,7 @@
 				continue
 			if(M.stat)
 				M.visible_message("<span class='notice'>[M] vanishes as [M.p_theyre()] reclaimed for recycling!</span>")
-				recycler.use_power(500)
+				recycler.use_energy(500)
 				X.monkeys += recycler.cube_production
 				X.monkeys = round(X.monkeys, 0.1)		//Prevents rounding errors
 				qdel(M)
@@ -483,7 +483,7 @@
 		if(!M.stat)
 			return
 		M.visible_message("<span class='notice'>[M] vanishes as [p_theyre()] reclaimed for recycling!</span>")
-		X.connected_recycler.use_power(500)
+		X.connected_recycler.use_energy(500)
 		X.monkeys += connected_recycler.cube_production
 		X.monkeys = round(X.monkeys, 0.1)		//Prevents rounding errors
 		qdel(M)

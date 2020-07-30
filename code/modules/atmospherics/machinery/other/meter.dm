@@ -6,8 +6,8 @@
 	layer = GAS_PUMP_LAYER
 	power_channel = AREA_USAGE_ENVIRON
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 2
-	active_power_usage = 4
+	idle_power_usage = 1
+	active_power_usage = 2
 	max_integrity = 150
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 100, BOMB = 0, BIO = 100, RAD = 100, FIRE = 40, ACID = 0)
 	var/frequency = 0
@@ -66,7 +66,7 @@
 		icon_state = "meter0"
 		return FALSE
 
-	use_power(5)
+	use_energy(5)
 
 	var/datum/gas_mixture/environment = target.return_air()
 	if(!environment)

@@ -1,16 +1,20 @@
+
+/// Cell charger efficiency, 0.99 means its 99% efficient, 1% of energy goes to waste
+#define CELLCHARGER_EFFICIENCY 0.99
+
 /obj/machinery/cell_charger
 	name = "cell charger"
 	desc = "It charges power cells."
 	icon = 'icons/obj/power.dmi'
 	icon_state = "ccharger"
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 5
-	active_power_usage = 60
+	idle_power_usage = 3
+	active_power_usage = 30
 	power_channel = AREA_USAGE_EQUIP
 	circuit = /obj/item/circuitboard/machine/cell_charger
 	pass_flags = PASSTABLE
 	var/obj/item/stock_parts/cell/charging = null
-	var/charge_rate = 250
+	var/charge_rate = 250e3
 
 /obj/machinery/cell_charger/update_overlays()
 	. = ..()
@@ -30,7 +34,7 @@
 	if(charging)
 		. += "Current charge: [round(charging.percent(), 1)]%."
 	if(in_range(user, src) || isobserver(user))
-		. += "<span class='notice'>The status display reads: Charging power: <b>[charge_rate]W</b>.</span>"
+		. += "<span class='notice'>The status display reads: Charging power: <b>[siunit(charge_rate, "W", 1)]</b>.</span>"
 
 /obj/machinery/cell_charger/attackby(obj/item/W, mob/user, params)
 	if(istype(W, /obj/item/stock_parts/cell) && !panel_open)
@@ -118,7 +122,7 @@
 		charging.emp_act(severity)
 
 /obj/machinery/cell_charger/RefreshParts()
-	charge_rate = 250
+	charge_rate = 250e3
 	for(var/obj/item/stock_parts/capacitor/C in component_parts)
 		charge_rate *= C.rating
 
@@ -129,10 +133,8 @@
 	if(charging.percent() >= 100)
 		return
 
-	var/main_draw = use_power_from_net(charge_rate * delta_time, take_any = TRUE) //Pulls directly from the Powernet to dump into the cell
-	if(!main_draw)
-		return
-	charging.give(main_draw)
-	use_power(charge_rate / 100) //use a small bit for the charger itself, but power usage scales up with the part tier
+	use_energy(charging.give(charge_rate * delta_time) / CELLCHARGER_EFFICIENCY)
 
 	update_icon()
+
+#undef CELLCHARGER_EFFICIENCY

@@ -103,7 +103,7 @@
 	removed.gases[/datum/gas/hydrogen][MOLES] += proportion * 2 * workingPower
 	env.merge(removed) //put back the new gases in the turf
 	air_update_turf(FALSE, FALSE)
-	cell.use((5 * proportion * workingPower) / (efficiency + workingPower))
+	cell.use((5e3 * proportion * workingPower) / (efficiency + workingPower))
 
 /obj/machinery/electrolyzer/RefreshParts()
 	var/electrolite = 0

@@ -1,15 +1,15 @@
 /obj/item/computer_hardware/recharger
 	critical = 1
 	enabled = 1
-	var/charge_rate = 100
+	var/charge_rate = 100 /// Charging power in watts
 	device_type = MC_CHARGE
 
-/obj/item/computer_hardware/recharger/proc/use_power(amount, charging=0)
+/obj/item/computer_hardware/recharger/proc/use_energy(energy, charging=FALSE)
 	if(charging)
 		return TRUE
 	return FALSE
 
-/obj/item/computer_hardware/recharger/process()
+/obj/item/computer_hardware/recharger/process(delta_time)
 	..()
 	var/obj/item/computer_hardware/battery/battery_module = holder.all_components[MC_CELL]
 	if(!holder || !battery_module || !battery_module.battery)
@@ -19,8 +19,8 @@
 	if(cell.charge >= cell.maxcharge)
 		return
 
-	if(use_power(charge_rate, charging=1))
-		holder.give_power(charge_rate * GLOB.CELLRATE)
+	if(use_energy(charge_rate * delta_time, charging=TRUE))
+		holder.give_energy(charge_rate * delta_time)
 
 
 /obj/item/computer_hardware/recharger/apc_recharger
@@ -29,20 +29,19 @@
 	icon_state = "charger_APC"
 	w_class = WEIGHT_CLASS_SMALL // Can't be installed into tablets/PDAs
 
-/obj/item/computer_hardware/recharger/apc_recharger/use_power(amount, charging=0)
+/obj/item/computer_hardware/recharger/apc_recharger/use_energy(energy, charging=FALSE)
 	if(ismachinery(holder.physical))
 		var/obj/machinery/M = holder.physical
 		if(M.powered())
-			M.use_power(amount)
+			M.use_energy(energy)
 			return TRUE
-
 	else
 		var/area/A = get_area(src)
 		if(!istype(A))
 			return FALSE
 
 		if(A.powered(AREA_USAGE_EQUIP))
-			A.use_power(amount, AREA_USAGE_EQUIP)
+			A.use_energy(energy, AREA_USAGE_EQUIP)
 			return TRUE
 	return FALSE
 
@@ -58,7 +57,7 @@
 	to_chat(user, "<span class='warning'>\The [src] is incompatible with portable computers!</span>")
 	return FALSE
 
-/obj/item/computer_hardware/recharger/wired/use_power(amount, charging=0)
+/obj/item/computer_hardware/recharger/wired/use_energy(energy, charging=FALSE)
 	if(ismachinery(holder.physical) && holder.physical.anchored)
 		var/obj/machinery/M = holder.physical
 		var/turf/T = M.loc
@@ -69,10 +68,10 @@
 		if(!C || !C.powernet)
 			return FALSE
 
-		var/power_in_net = C.powernet.avail-C.powernet.load
-
-		if(power_in_net && power_in_net > amount)
-			C.powernet.load += amount
+		var/power_in_net = C.powernet.newavail - C.powernet.delayedload
+		var/power_load = energy / SSMACHINES_DT
+		if(power_in_net && power_in_net > power_load)
+			C.powernet.delayedload += power_load
 			return TRUE
 	return FALSE
 
@@ -82,7 +81,7 @@
 	name = "modular interface power harness"
 	desc = "A standard connection to power a small computer device from a cyborg's chassis."
 
-/obj/item/computer_hardware/recharger/cyborg/use_power(amount, charging=0)
+/obj/item/computer_hardware/recharger/cyborg/use_energy(amount, charging=0)
 	return TRUE
 
 
@@ -92,8 +91,7 @@
 	desc = "A very complex device that draws power from its own bluespace dimension."
 	icon_state = "charger_lambda"
 	w_class = WEIGHT_CLASS_TINY
-	charge_rate = 100000
+	charge_rate = 100e3
 
-/obj/item/computer_hardware/recharger/lambda/use_power(amount, charging=0)
-	return 1
-
+/obj/item/computer_hardware/recharger/lambda/use_energy(energy, charging=FALSE)
+	return TRUE

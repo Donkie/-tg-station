@@ -117,7 +117,7 @@
 
 /obj/item/melee/transforming/energy/sword/cyborg
 	sword_color = "red"
-	var/hitcost = 50
+	var/hitcost = 50e3 /// Energy consumed on hit, in joules
 
 /obj/item/melee/transforming/energy/sword/cyborg/attack(mob/M, mob/living/silicon/robot/R)
 	if(R.cell)
@@ -138,7 +138,7 @@
 	icon_state = "esaw_0"
 	icon_state_on = "esaw_1"
 	sword_color = null //stops icon from breaking when turned on.
-	hitcost = 75 //Costs more than a standard cyborg esword
+	hitcost = 75e3 //Costs more than a standard cyborg esword
 	w_class = WEIGHT_CLASS_NORMAL
 	sharpness = SHARP_EDGED
 	light_color = LIGHT_COLOR_LIGHT_CYAN

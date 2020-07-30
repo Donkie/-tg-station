@@ -21,7 +21,7 @@
 	var/setMode = "auto" // Anything other than "heat" or "cool" is considered auto.
 	var/targetTemperature = T20C
 	var/heatingPower = 20000
-	var/efficiency = 20000
+	var/efficiency = 20 /// The efficiency of the heater. Yes this is a 2000% efficiency machine, for gameplay reasons
 	var/temperatureTolerance = 1
 	var/settableTemperatureMedian = 30 + T0C
 	var/settableTemperatureRange = 30
@@ -128,7 +128,7 @@
 	heatingPower = laser * 20000
 
 	settableTemperatureRange = cap * 30
-	efficiency = (cap + 1) * 10000
+	efficiency = (cap + 1) * 10
 
 	targetTemperature = clamp(targetTemperature,
 		max(settableTemperatureMedian - settableTemperatureRange, TCMB),

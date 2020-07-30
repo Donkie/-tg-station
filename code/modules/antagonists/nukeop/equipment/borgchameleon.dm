@@ -11,8 +11,8 @@
 	var/friendlyName
 	var/savedName
 	var/active = FALSE
-	var/activationCost = 300
-	var/activationUpkeep = 50
+	var/activationCost = 300e3 /// Energy consumed when activated, in joules
+	var/activationUpkeep = 25e3 /// Power consumption when in use, in watts
 	var/disguise = "engineer"
 	var/mob/listeningTo
 	var/static/list/signalCache = list( // list here all signals that should break the camouflage
@@ -44,13 +44,13 @@
 	disrupt(user)
 
 /obj/item/borg_chameleon/attack_self(mob/living/silicon/robot/user)
-	if (user && user.cell && user.cell.charge >  activationCost)
+	if (user && user.cell && user.cell.charge > activationCost)
 		if (isturf(user.loc))
 			toggle(user)
 		else
 			to_chat(user, "<span class='warning'>You can't use [src] while inside something!</span>")
 	else
-		to_chat(user, "<span class='warning'>You need at least [activationCost] charge in your cell to use [src]!</span>")
+		to_chat(user, "<span class='warning'>You need at least [siunit(activationCost, "J", 0.1)] of energy in your cell to use [src]!</span>")
 
 /obj/item/borg_chameleon/proc/toggle(mob/living/silicon/robot/user)
 	if(active)
@@ -75,9 +75,9 @@
 		remove_wibbly_filters(user)
 		animation_playing = FALSE
 
-/obj/item/borg_chameleon/process()
+/obj/item/borg_chameleon/process(delta_time)
 	if (user)
-		if (!user.cell || !user.cell.use(activationUpkeep))
+		if (!user.cell || !user.cell.use(activationUpkeep * delta_time))
 			disrupt(user)
 	else
 		return PROCESS_KILL

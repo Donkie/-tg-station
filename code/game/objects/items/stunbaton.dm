@@ -21,7 +21,7 @@
 
 	var/obj/item/stock_parts/cell/cell
 	var/preload_cell_type //if not empty the baton starts with this type of cell
-	var/cell_hit_cost = 1000
+	var/cell_hit_cost = 1e6 /// Energy consumption when used, in joules
 	var/can_remove_cell = TRUE
 
 	var/turned_on = FALSE
@@ -264,7 +264,7 @@
 /obj/item/melee/baton/emp_act(severity)
 	. = ..()
 	if (!(. & EMP_PROTECT_SELF))
-		deductcharge(1000 / severity)
+		deductcharge(1e6 / severity)
 
 /obj/item/melee/baton/proc/shields_blocked(mob/living/L, mob/user)
 	if(ishuman(L))
@@ -287,7 +287,7 @@
 	force = 3
 	throwforce = 5
 	stun_time = 5 SECONDS
-	cell_hit_cost = 2000
+	cell_hit_cost = 2e6
 	throw_stun_chance = 10
 	slot_flags = ITEM_SLOT_BACK
 	convertible = FALSE
@@ -315,7 +315,7 @@
 	force = 5
 	throwforce = 5
 	throw_range = 5
-	cell_hit_cost = 2000
+	cell_hit_cost = 2e6
 	throw_stun_chance = 99  //Have you prayed today?
 	convertible = FALSE
 	custom_materials = list(/datum/material/iron = 10000, /datum/material/glass = 4000, /datum/material/silver = 10000, /datum/material/gold = 2000)

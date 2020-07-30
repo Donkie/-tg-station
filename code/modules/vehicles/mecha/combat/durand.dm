@@ -30,9 +30,9 @@
 	. = ..()
 	initialize_passenger_action_type(/datum/action/vehicle/sealed/mecha/mech_defense_mode)
 
-/obj/vehicle/sealed/mecha/combat/durand/process()
+/obj/vehicle/sealed/mecha/combat/durand/process(delta_time)
 	. = ..()
-	if(defense_mode && !use_power(100))	//Defence mode can only be on with a occupant so we check if one of them can toggle it and toggle
+	if(defense_mode && !use_energy(50e3 * delta_time)) //Defence mode can only be on with a occupant so we check if one of them can toggle it and toggle
 		for(var/O in occupants)
 			var/mob/living/occupant = O
 			var/datum/action/action = LAZYACCESSASSOC(occupant_actions, occupant, /datum/action/vehicle/sealed/mecha/mech_defense_mode)
@@ -187,7 +187,7 @@ own integrity back to max. Shield is automatically dropped if we run out of powe
 		return
 	if(switching && !signal_args[1])
 		return
-	if(!chassis.defense_mode && (!chassis.cell || chassis.cell.charge < 100)) //If it's off, and we have less than 100 units of power
+	if(!chassis.defense_mode && (!chassis.cell || chassis.cell.charge < 100e3)) //If it's off, and we have less than 100 units of power
 		to_chat(currentuser, "[icon2html(src, currentuser)]<span class='warn'>Insufficient power; cannot activate defense mode.</span>")
 		return
 	switching = TRUE
@@ -231,7 +231,7 @@ own integrity back to max. Shield is automatically dropped if we run out of powe
 		return
 	. = ..()
 	flick("shield_impact", src)
-	if(!chassis.use_power((max_integrity - obj_integrity) * 100))
+	if(!chassis.use_energy((max_integrity - obj_integrity) * 100e3))
 		chassis.cell?.charge = 0
 		for(var/O in chassis.occupants)
 			var/mob/living/occupant = O

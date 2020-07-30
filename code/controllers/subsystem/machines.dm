@@ -29,9 +29,11 @@ SUBSYSTEM_DEF(machines)
 
 
 /datum/controller/subsystem/machines/fire(resumed = FALSE)
-	if (!resumed)
-		for(var/datum/powernet/Powernet in powernets)
-			Powernet.reset() //reset the power state.
+	var/delta_time = wait * 0.1
+
+	if(!resumed)
+		for(var/datum/powernet/the_powernet in powernets)
+			the_powernet.reset(delta_time) //reset the power state.
 		src.currentrun = processing.Copy()
 
 	//cache for sanic speed (lists are references anyways)
@@ -40,9 +42,9 @@ SUBSYSTEM_DEF(machines)
 	while(currentrun.len)
 		var/obj/machinery/thing = currentrun[currentrun.len]
 		currentrun.len--
-		if(!QDELETED(thing) && thing.process(wait * 0.1) != PROCESS_KILL)
+		if(!QDELETED(thing) && thing.process(delta_time) != PROCESS_KILL)
 			if(thing.use_power)
-				thing.auto_use_power() //add back the power state
+				thing.auto_use_power(delta_time) //add back the power state
 		else
 			processing -= thing
 			if (!QDELETED(thing))

@@ -22,8 +22,8 @@
 	name = "holodeck control console"
 	desc = "A computer used to control a nearby holodeck."
 	icon_screen = "holocontrol"
-	idle_power_usage = 10
-	active_power_usage = 50
+	idle_power_usage = 5
+	active_power_usage = 25
 
 	var/area/holodeck/linked
 	var/area/holodeck/program
@@ -67,9 +67,11 @@
 		linked.linked = src
 		var/area/my_area = get_area(src)
 		if(my_area)
-			linked.power_usage = my_area.power_usage
+			linked.power_load = my_area.power_load
+			linked.energy_usage = my_area.energy_usage
 		else
-			linked.power_usage = new /list(AREA_USAGE_LEN)
+			linked.power_load = new /list(AREA_USAGE_LEN)
+			linked.energy_usage = new /list(AREA_USAGE_LEN)
 
 	generate_program_list()
 	load_program(offline_program, FALSE, FALSE)
@@ -78,7 +80,8 @@
 	emergency_shutdown()
 	if(linked)
 		linked.linked = null
-		linked.power_usage = new /list(AREA_USAGE_LEN)
+		linked.power_load = new /list(AREA_USAGE_LEN)
+		linked.energy_usage = new /list(AREA_USAGE_LEN)
 	return ..()
 
 /obj/machinery/computer/holodeck/power_change()
@@ -165,7 +168,7 @@
 		var/obj/effect/holodeck_effect/HE = e
 		HE.tick()
 
-	active_power_usage = 50 + spawned.len * 3 + effects.len * 5
+	active_power_usage = 25 + spawned.len * 1.5 + effects.len * 2.5
 
 /obj/machinery/computer/holodeck/emag_act(mob/user)
 	if(obj_flags & EMAGGED)

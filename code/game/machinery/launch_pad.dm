@@ -3,9 +3,9 @@
 	desc = "A bluespace pad able to thrust matter through bluespace, teleporting it to or from nearby locations."
 	icon = 'icons/obj/telescience.dmi'
 	icon_state = "lpad-idle"
-	use_power = TRUE
-	idle_power_usage = 200
-	active_power_usage = 2500
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 100
+	active_power_usage = 1250
 	hud_possible = list(DIAG_LAUNCHPAD_HUD)
 	circuit = /obj/item/circuitboard/machine/launchpad
 	var/icon_teleport = "lpad-beam"
@@ -148,7 +148,7 @@
 	teleporting = FALSE
 
 	// use a lot of power
-	use_power(1000)
+	use_energy(1000)
 
 	var/turf/source = target
 	var/list/log_msg = list()
@@ -215,7 +215,7 @@
 	icon_state = "blpad-idle"
 	icon_teleport = "blpad-beam"
 	anchored = FALSE
-	use_power = FALSE
+	use_power = NO_POWER_USE
 	idle_power_usage = 0
 	active_power_usage = 0
 	teleport_speed = 20

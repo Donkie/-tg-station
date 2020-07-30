@@ -10,8 +10,8 @@
 	circuit = /obj/item/circuitboard/machine/emitter
 
 	use_power = NO_POWER_USE
-	idle_power_usage = 10
-	active_power_usage = 300
+	idle_power_usage = 5
+	active_power_usage = 150
 
 	var/icon_state_on = "emitter_+a"
 	var/icon_state_underpowered = "emitter_+u"
@@ -47,12 +47,12 @@
 /obj/machinery/power/emitter/ctf
 	name = "Energy Cannon"
 	active = TRUE
-	active_power_usage = FALSE
-	idle_power_usage = FALSE
+	active_power_usage = 0
+	idle_power_usage = 0
 	locked = TRUE
 	req_access_txt = "100"
 	welded = TRUE
-	use_power = FALSE
+	use_power = NO_POWER_USE
 
 /obj/machinery/power/emitter/Initialize()
 	. = ..()
@@ -108,7 +108,7 @@
 			. += "<span class='notice'>Its status display is glowing faintly.</span>"
 		else
 			. += "<span class='notice'>Its status display reads: Emitting one beam every <b>[DisplayTimeText(fire_delay)]</b>.</span>"
-			. += "<span class='notice'>Power consumption at <b>[DisplayPower(active_power_usage)]</b>.</span>"
+			. += "<span class='notice'>Power consumption at <b>[siunit(active_power_usage, "W", 1)]</b>.</span>"
 
 /obj/machinery/power/emitter/ComponentInitialize()
 	. = ..()

@@ -302,11 +302,11 @@
 	if(!ionpulse_on)
 		return
 
-	if(cell.charge <= 10)
+	if(cell.charge <= 10e3)
 		toggle_ionpulse()
 		return
 
-	cell.charge -= 10
+	cell.charge -= 10e3
 	return TRUE
 
 /mob/living/silicon/robot/proc/toggle_ionpulse()
@@ -329,7 +329,7 @@
 	. = ..()
 	. += ""
 	if(cell)
-		. += "Charge Left: [cell.charge]/[cell.maxcharge]"
+		. += "Charge Left: [siunit(cell.charge, "J", 0.1)]/[siunit(cell.maxcharge, "J", 0.1)]"
 	else
 		. += text("No Cell Inserted!")
 
@@ -1102,7 +1102,7 @@
 
 /mob/living/silicon/robot/proc/charge(datum/source, amount, repairs)
 	if(module)
-		module.respawn_consumable(src, amount * 0.005)
+		module.respawn_consumable(src, amount * 5e-6)
 	if(cell)
 		cell.charge = min(cell.charge + amount, cell.maxcharge)
 	if(repairs)

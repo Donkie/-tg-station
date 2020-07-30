@@ -62,8 +62,8 @@
 	icon = 'icons/obj/monitors.dmi'
 	icon_state = "alarm0"
 	use_power = IDLE_POWER_USE
-	idle_power_usage = 4
-	active_power_usage = 8
+	idle_power_usage = 2
+	active_power_usage = 4
 	power_channel = AREA_USAGE_ENVIRON
 	req_access = list(ACCESS_ATMOSPHERICS)
 	max_integrity = 250
@@ -801,7 +801,7 @@
 
 			if(istype(W, /obj/item/electroadaptive_pseudocircuit))
 				var/obj/item/electroadaptive_pseudocircuit/P = W
-				if(!P.adapt_circuit(user, 25))
+				if(!P.adapt_circuit(user, 25e3))
 					return
 				user.visible_message("<span class='notice'>[user] fabricates a circuit and places it into [src].</span>", \
 				"<span class='notice'>You adapt an air alarm circuit and slot it into the assembly.</span>")
