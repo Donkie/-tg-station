@@ -109,7 +109,7 @@
 
 /datum/component/nanites/process()
 	if(!IS_IN_STASIS(host_mob))
-		adjust_nanites(null, regen_rate)
+		adjust_nanites(null, regen_rate * SSNANITES_DT)
 		add_research()
 		for(var/X in programs)
 			var/datum/nanite_program/NP = X
