@@ -141,7 +141,7 @@
 	if(!src.occupant)
 		audible_message("<span class='hear'>You hear a loud metallic grinding sound.</span>")
 		return
-	use_power(1000)
+	use_energy(1000)
 	audible_message("<span class='hear'>You hear a loud squelchy grinding sound.</span>")
 	playsound(src.loc, 'sound/machines/juicer.ogg', 50, TRUE)
 	operating = TRUE

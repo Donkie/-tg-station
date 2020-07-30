@@ -104,7 +104,7 @@
 			C.powernet.load += amount
 			return TRUE
 	if(powered())
-		use_power(amount)
+		use_energy(amount)
 		return TRUE
 	return FALSE
 

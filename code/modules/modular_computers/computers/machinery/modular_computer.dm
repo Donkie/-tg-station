@@ -58,7 +58,7 @@
 	icon_state = icon_state_powered
 
 	if(!cpu || !cpu.enabled)
-		if (!(machine_stat & NOPOWER) && (cpu && cpu.use_power()))
+		if (!(machine_stat & NOPOWER) && (cpu && cpu.use_energy()))
 			add_overlay(screen_icon_screensaver)
 		else
 			icon_state = icon_state_unpowered
@@ -129,7 +129,7 @@
 
 // Modular computers can have battery in them, we handle power in previous proc, so prevent this from messing it up for us.
 /obj/machinery/modular_computer/power_change()
-	if(cpu && cpu.use_power()) // If MC_CPU still has a power source, PC wouldn't go offline.
+	if(cpu && cpu.use_energy()) // If MC_CPU still has a power source, PC wouldn't go offline.
 		machine_stat &= ~NOPOWER
 		update_icon()
 		return

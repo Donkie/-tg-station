@@ -234,7 +234,7 @@
 	M.AdjustUnconscious(-80)
 	if(M.reagents.get_reagent_amount(/datum/reagent/medicine/epinephrine) < 5)
 		M.reagents.add_reagent(/datum/reagent/medicine/epinephrine, 5)
-	chassis.use_power(energy_drain)
+	chassis.use_energy(energy_drain)
 	update_equip_info()
 
 
@@ -511,7 +511,7 @@
 	var/amount = synth_speed / processed_reagents.len
 	for(var/reagent in processed_reagents)
 		reagents.add_reagent(reagent,amount)
-		chassis.use_power(energy_drain)
+		chassis.use_energy(energy_drain)
 
 ///////////////////////////////// Medical Beam ///////////////////////////////////////////////////////////////
 

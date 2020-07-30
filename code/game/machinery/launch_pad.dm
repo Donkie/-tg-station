@@ -148,7 +148,7 @@
 	teleporting = FALSE
 
 	// use a lot of power
-	use_power(1000)
+	use_energy(1000)
 
 	var/turf/source = target
 	var/list/log_msg = list()

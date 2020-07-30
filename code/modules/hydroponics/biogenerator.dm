@@ -186,7 +186,7 @@
 		processing = TRUE
 		update_icon()
 		playsound(loc, 'sound/machines/blender.ogg', 50, TRUE)
-		use_power(S * 30)
+		use_energy(S * 30)
 		sleep(S + 15 / productivity)
 		processing = FALSE
 		update_icon()

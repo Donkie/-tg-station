@@ -142,7 +142,7 @@
 	rpm = max(0, rpm - (rpm*rpm)/(COMPFRICTION*efficiency))
 
 	if(starter && !(machine_stat & NOPOWER))
-		use_power(2800)
+		use_energy(2800 * SSmachines.wait / 10)
 		if(rpm<1000)
 			rpmtarget = 1000
 	else

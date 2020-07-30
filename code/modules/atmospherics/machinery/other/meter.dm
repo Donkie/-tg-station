@@ -61,7 +61,7 @@
 		icon_state = "meter0"
 		return 0
 
-	use_power(5)
+	use_energy(5)
 
 	var/datum/gas_mixture/environment = target.return_air()
 	if(!environment)

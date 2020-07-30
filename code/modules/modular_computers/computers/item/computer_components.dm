@@ -40,7 +40,7 @@
 	H.forceMove(get_turf(src))
 	H.holder = null
 	H.on_remove(src, user)
-	if(enabled && !use_power())
+	if(enabled && !use_energy())
 		shutdown_computer()
 	update_icon()
 

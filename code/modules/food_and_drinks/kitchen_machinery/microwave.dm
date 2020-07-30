@@ -302,7 +302,7 @@
 				pre_success()
 		return
 	time--
-	use_power(500)
+	use_energy(500)
 	addtimer(CALLBACK(src, .proc/loop, type, time, wait), wait)
 
 /obj/machinery/microwave/power_change()

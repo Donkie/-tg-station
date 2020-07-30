@@ -61,7 +61,7 @@
 		battery = null
 
 		if(holder)
-			if(holder.enabled && !holder.use_power())
+			if(holder.enabled && !holder.use_energy())
 				holder.shutdown_computer()
 
 		return TRUE

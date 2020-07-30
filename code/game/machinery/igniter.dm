@@ -32,7 +32,7 @@
 		return
 	add_fingerprint(user)
 
-	use_power(50)
+	use_energy(50)
 	on = !( on )
 	update_icon()
 
@@ -124,7 +124,7 @@
 	flick("[initial(icon_state)]-spark", src)
 	spark_system.start()
 	last_spark = world.time
-	use_power(1000)
+	use_energy(1000)
 	var/turf/location = src.loc
 	if (isturf(location))
 		location.hotspot_expose(1000,2500,1)

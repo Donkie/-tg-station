@@ -184,10 +184,8 @@
 				if((M.machine_stat & (NOPOWER|BROKEN)) || !M.anchored)
 					break
 
-				if(!user.cell.give(150))
-					break
-
-				M.use_power(200)
+				user.cell.give(150)
+				M.use_energy(200)
 
 			to_chat(user, "<span class='notice'>You stop charging yourself.</span>")
 

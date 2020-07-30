@@ -50,20 +50,20 @@
 	adjacent_turfs.Cut()
 	return ..()
 
-/obj/machinery/atmospherics/components/unary/vent_scrubber/auto_use_power()
+/obj/machinery/atmospherics/components/unary/vent_scrubber/auto_use_power(delta_time)
 	if(!on || welded || !is_operational() || !powered(power_channel))
 		return FALSE
 
-	var/amount = idle_power_usage
+	var/power = idle_power_usage
 
 	if(scrubbing & SCRUBBING)
-		amount += idle_power_usage * length(filter_types)
+		power += idle_power_usage * length(filter_types)
 	else //scrubbing == SIPHONING
-		amount = active_power_usage
+		power = active_power_usage
 
 	if(widenet)
-		amount += amount * (adjacent_turfs.len * (adjacent_turfs.len / 2))
-	use_power(amount, power_channel)
+		power += power * (adjacent_turfs.len * (adjacent_turfs.len / 2))
+	use_energy(power * delta_time, power_channel)
 	return TRUE
 
 /obj/machinery/atmospherics/components/unary/vent_scrubber/update_icon_nopipes()

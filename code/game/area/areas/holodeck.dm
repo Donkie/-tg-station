@@ -31,7 +31,7 @@
 	ASSERT(!istype(A, /area/holodeck))
 	return ..()
 
-/area/holodeck/use_power(amount, chan)
+/area/holodeck/use_energy(energy, chan)
 	if(!linked)
 		return 0
 	var/area/A = get_area(linked)

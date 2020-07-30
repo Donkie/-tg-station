@@ -1,22 +1,27 @@
-// Tries to draw power from charger or, if no operational charger is present, from power cell.
-/obj/item/modular_computer/proc/use_power(amount = 0)
+/**
+  * Tries to draw power from charger or, if no operational charger is present, from power cell. Returns TRUE/FALSE if we were able to power this load.
+  *
+  * Arguments:
+  * * energy: How much energy to use in joules
+  */
+/obj/item/modular_computer/proc/use_energy(energy = 0)
 	if(check_power_override())
 		return TRUE
 
 	var/obj/item/computer_hardware/recharger/recharger = all_components[MC_CHARGE]
 
 	if(recharger && recharger.check_functionality())
-		if(recharger.use_power(amount))
+		if(recharger.use_energy(energy))
 			return TRUE
 
 	var/obj/item/computer_hardware/battery/battery_module = all_components[MC_CELL]
 
 	if(battery_module && battery_module.battery && battery_module.battery.charge)
 		var/obj/item/stock_parts/cell/cell = battery_module.battery
-		if(cell.use(amount * GLOB.CELLRATE))
+		if(cell.use(energy * GLOB.CELLRATE))
 			return TRUE
 		else // Discharge the cell anyway.
-			cell.use(min(amount*GLOB.CELLRATE, cell.charge))
+			cell.use(min(energy*GLOB.CELLRATE, cell.charge))
 			return FALSE
 	return FALSE
 
@@ -41,7 +46,7 @@
 		shutdown_computer(0)
 
 // Handles power-related things, such as battery interaction, recharging, shutdown when it's discharged
-/obj/item/modular_computer/proc/handle_power()
+/obj/item/modular_computer/proc/handle_power(delta_time)
 	var/obj/item/computer_hardware/recharger/recharger = all_components[MC_CHARGE]
 	if(recharger)
 		recharger.process()
@@ -52,7 +57,8 @@
 		if(H.enabled)
 			power_usage += H.power_usage
 
-	if(use_power(power_usage))
+	var/energy_usage = power_usage * delta_time
+	if(use_energy(energy_usage))
 		last_power_usage = power_usage
 		return TRUE
 	else

@@ -56,7 +56,7 @@
 		update_icon()
 		return FALSE
 
-	use_power(100)
+	use_energy(100)
 	to_chat(user, "<span class='notice'>You finish pressing a new license plate!</span>")
 
 	pressing = FALSE

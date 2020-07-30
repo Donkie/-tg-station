@@ -175,7 +175,7 @@
 					continue
 				step_towards(S, center)
 
-		use_power(electricity_level * 5)
+		use_energy(electricity_level * 5)
 		sleep(13 - electricity_level)
 
 	magneting = FALSE

@@ -171,7 +171,7 @@
 		flick("[skin]-denied", src)
 		return
 
-	use_power(5)
+	use_energy(5)
 	icon_state = "[skin]1"
 
 	if(device)

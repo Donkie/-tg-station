@@ -41,7 +41,7 @@ SUBSYSTEM_DEF(machines)
 		currentrun.len--
 		if(!QDELETED(thing) && thing.process(seconds) != PROCESS_KILL)
 			if(thing.use_power)
-				thing.auto_use_power() //add back the power state
+				thing.auto_use_power(seconds) //add back the power state
 		else
 			processing -= thing
 			if (!QDELETED(thing))

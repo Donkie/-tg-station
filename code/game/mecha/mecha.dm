@@ -435,8 +435,7 @@
 			checking = checking.loc
 
 	if(lights)
-		var/lights_energy_drain = 2
-		use_power(lights_energy_drain)
+		use_energy(2)
 
 	if(!enclosed && occupant?.incapacitated()) //no sides mean it's easy to just sorta fall out if you're incapacitated.
 		visible_message("<span class='warning'>[occupant] tumbles out of the cockpit!</span>")
@@ -622,7 +621,7 @@
 	else
 		move_result = mechstep(direction)
 	if(move_result || loc != oldloc)// halfway done diagonal move still returns false
-		use_power(step_energy_drain)
+		use_energy(step_energy_drain)
 		can_move = world.time + step_in
 		return 1
 	return 0
@@ -656,7 +655,7 @@
 		if(phase_state)
 			flick(phase_state, src)
 		forceMove(get_step(src,dir))
-		use_power(phasing_energy_drain)
+		use_energy(phasing_energy_drain)
 		addtimer(VARSET_CALLBACK(src, can_move, TRUE), step_in*3)
 	else
 		if(..()) //mech was thrown
@@ -1118,8 +1117,8 @@ GLOBAL_VAR_INIT(year_integer, text2num(year)) // = 2013???
 ///// Power stuff /////
 ///////////////////////
 
-/obj/mecha/proc/has_charge(amount)
-	return (get_charge()>=amount)
+/obj/mecha/proc/has_charge(energy)
+	return (get_charge()>=energy)
 
 /obj/mecha/proc/get_charge()
 	for(var/obj/item/mecha_parts/mecha_equipment/tesla_energy_relay/R in equipment)
@@ -1129,14 +1128,14 @@ GLOBAL_VAR_INIT(year_integer, text2num(year)) // = 2013???
 	if(cell)
 		return max(0, cell.charge)
 
-/obj/mecha/proc/use_power(amount)
-	if(get_charge() && cell.use(amount))
+/obj/mecha/proc/use_energy(energy)
+	if(get_charge() && cell.use(energy))
 		return 1
 	return 0
 
-/obj/mecha/proc/give_power(amount)
+/obj/mecha/proc/give_energy(energy)
 	if(!isnull(get_charge()))
-		cell.give(amount)
+		cell.give(energy)
 		return 1
 	return 0
 

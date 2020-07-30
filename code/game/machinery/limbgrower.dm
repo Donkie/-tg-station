@@ -99,11 +99,11 @@
 
 
 			var/synth_cost = being_built.reagents_list[/datum/reagent/medicine/c2/synthflesh]*prod_coeff
-			var/power = max(2000, synth_cost/5)
+			var/energy = max(2000, synth_cost/5)
 
 			if(reagents.has_reagent(/datum/reagent/medicine/c2/synthflesh, being_built.reagents_list[/datum/reagent/medicine/c2/synthflesh]*prod_coeff))
 				busy = TRUE
-				use_power(power)
+				use_energy(energy)
 				flick("limbgrower_fill",src)
 				icon_state = "limbgrower_idleon"
 				addtimer(CALLBACK(src, .proc/build_item),32*prod_coeff)

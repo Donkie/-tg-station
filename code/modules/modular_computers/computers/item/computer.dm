@@ -263,7 +263,7 @@
 	if(recharger)
 		recharger.enabled = 1
 
-	if(all_components[MC_CPU] && use_power()) // use_power() checks if the PC is powered
+	if(all_components[MC_CPU] && use_energy()) // use_energy() checks if the PC is powered
 		if(issynth)
 			to_chat(user, "<span class='notice'>You send an activation signal to \the [src], turning it on.</span>")
 		else
@@ -278,7 +278,7 @@
 			to_chat(user, "<span class='warning'>You press the power button but \the [src] does not respond.</span>")
 
 // Process currently calls handle_power(), may be expanded in future if more things are added.
-/obj/item/modular_computer/process()
+/obj/item/modular_computer/process(delta_time)
 	if(!enabled) // The computer is turned off
 		last_power_usage = 0
 		return 0
@@ -310,7 +310,7 @@
 		else
 			idle_threads.Remove(P)
 
-	handle_power() // Handles all computer power interaction
+	handle_power(delta_time) // Handles all computer power interaction
 	//check_update_ui_need()
 
 // Function used by NanoUI's to obtain data for header. All relevant entries begin with "PC_"
@@ -343,7 +343,7 @@
 		data["PC_batterypercent"] = "N/C"
 		data["PC_showbatteryicon"] = battery_module ? 1 : 0
 
-	if(recharger && recharger.enabled && recharger.check_functionality() && recharger.use_power(0))
+	if(recharger && recharger.enabled && recharger.check_functionality() && recharger.use_energy())
 		data["PC_apclinkicon"] = "charging.gif"
 
 	switch(get_ntnet_status())

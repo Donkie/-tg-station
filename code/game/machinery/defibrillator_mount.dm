@@ -180,7 +180,7 @@
 	if(!C)
 		return PROCESS_KILL
 	if(C.charge < C.maxcharge && is_operational())
-		use_power(100)
+		use_energy(100)
 		C.give(80)
 		update_icon()
 

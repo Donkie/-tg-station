@@ -51,14 +51,14 @@ Class Procs:
          return:0 -- if object is not powered.
 
       Default definition uses 'use_power', 'power_channel', 'active_power_usage',
-      'idle_power_usage', 'powered()', and 'use_power()' implement behavior.
+      'idle_power_usage', 'powered()', and 'use_energy()' implement behavior.
 
    powered(chan = -1)         'modules/power/power.dm'
       Checks to see if area that contains the object has power available for power
       channel given in 'chan'. -1 defaults to power_channel
 
-   use_power(amount, chan=-1)   'modules/power/power.dm'
-      Deducts 'amount' from the power channel 'chan' of the area that contains the object.
+   use_energy(energy, chan=-1)   'modules/power/power.dm'
+      Deducts 'energy' from the power channel 'chan' of the area that contains the object.
 
    power_change()               'modules/power/power.dm'
       Called by the area that contains the object when ever that area under goes a
@@ -184,7 +184,7 @@ Class Procs:
 /obj/machinery/emp_act(severity)
 	. = ..()
 	if(use_power && !machine_stat && !(. & EMP_PROTECT_SELF))
-		use_power(7500/severity)
+		use_energy(7500/severity)
 		new /obj/effect/temp_visual/emp(loc)
 
 /obj/machinery/proc/open_machine(drop = TRUE)
@@ -232,13 +232,13 @@ Class Procs:
 	updateUsrDialog()
 	update_icon()
 
-/obj/machinery/proc/auto_use_power()
+/obj/machinery/proc/auto_use_power(delta_time)
 	if(!powered(power_channel))
 		return 0
 	if(use_power == 1)
-		use_power(idle_power_usage,power_channel)
+		use_energy(idle_power_usage * delta_time, power_channel)
 	else if(use_power >= 2)
-		use_power(active_power_usage,power_channel)
+		use_energy(active_power_usage * delta_time, power_channel)
 	return 1
 
 /obj/machinery/proc/is_operational()

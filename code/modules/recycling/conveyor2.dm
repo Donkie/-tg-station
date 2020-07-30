@@ -135,8 +135,6 @@ GLOBAL_LIST_EMPTY(conveyors_by_id)
 	if(!operating || conveying)
 		return
 
-	use_power(6)
-
 	//get the first 30 items in contents
 	affecting = list()
 	var/i = 0
@@ -146,6 +144,8 @@ GLOBAL_LIST_EMPTY(conveyors_by_id)
 		if(i >= MAX_CONVEYOR_ITEMS_MOVE)
 			break
 		affecting.Add(item)
+
+	use_energy(10 + 2 * i) // More items means it's heavier so it should take more energy to move them
 
 	conveying = TRUE
 	addtimer(CALLBACK(src, .proc/convey, affecting), 1)

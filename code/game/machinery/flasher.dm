@@ -109,7 +109,7 @@
 	flick("[base_state]_flash", src)
 	flash_lighting_fx(FLASH_LIGHT_RANGE, light_power, light_color)
 	last_flash = world.time
-	use_power(1000)
+	use_energy(1000)
 
 	var/flashed = FALSE
 	for (var/mob/living/L in viewers(src, null))

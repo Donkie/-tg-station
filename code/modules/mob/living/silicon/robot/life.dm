@@ -14,9 +14,9 @@
 				low_power_mode = 0
 				update_headlamp()
 		else if(stat == CONSCIOUS)
-			use_power()
+			use_energy()
 
-/mob/living/silicon/robot/proc/use_power()
+/mob/living/silicon/robot/proc/use_energy()
 	if(cell && cell.charge)
 		if(cell.charge <= 100)
 			uneq_all()

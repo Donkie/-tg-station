@@ -1178,7 +1178,7 @@
 	else
 		return 0
 
-/obj/machinery/power/apc/process()
+/obj/machinery/power/apc/process(delta_time)
 	if(icon_update_needed)
 		update_icon()
 	if(machine_stat & (BROKEN|MAINT))
@@ -1277,7 +1277,6 @@
 		/*
 		Set channels depending on how much charge we have left
 		*/
-		var/cellpercent = cell.percent()
 		if(cell.charge <= 0)
 			// zero charge, turn all off
 			equipment = autoset(equipment, 0)

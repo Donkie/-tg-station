@@ -106,7 +106,7 @@
 		"<span class='notice'>You turn on [src].</span>", \
 		"<span class='hear'>You hear a food processor.</span>")
 	playsound(src.loc, 'sound/machines/blender.ogg', 50, TRUE)
-	use_power(500)
+	use_energy(500)
 	var/total_time = 0
 	for(var/O in src.contents)
 		var/datum/food_processor_process/P = select_recipe(O)

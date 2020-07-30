@@ -21,7 +21,7 @@
 	circuit = /obj/item/circuitboard/machine/mech_recharger
 	var/obj/mecha/recharging_mech
 	var/obj/machinery/computer/mech_bay_power_console/recharge_console
-	var/max_charge = 50
+	var/max_charge = 50 /// Recharging rate in watts
 	var/on = FALSE
 	var/turf/recharging_turf = null
 
@@ -49,7 +49,7 @@
 	if(in_range(user, src) || isobserver(user))
 		. += "<span class='notice'>The status display reads: Base recharge rate at <b>[max_charge]J</b> per cycle.</span>"
 
-/obj/machinery/mech_bay_recharge_port/process()
+/obj/machinery/mech_bay_recharge_port/process(delta_time)
 	if(machine_stat & NOPOWER || !recharge_console)
 		return
 	if(!recharging_mech)
@@ -58,9 +58,9 @@
 			recharge_console.update_icon()
 	if(recharging_mech && recharging_mech.cell)
 		if(recharging_mech.cell.charge < recharging_mech.cell.maxcharge)
-			var/delta = min(max_charge, recharging_mech.cell.maxcharge - recharging_mech.cell.charge)
-			recharging_mech.give_power(delta)
-			use_power(delta*150)
+			var/energy = min(max_charge * delta_time, recharging_mech.cell.maxcharge - recharging_mech.cell.charge)
+			recharging_mech.give_energy(energy)
+			use_energy(energy * 150)
 		else
 			recharge_console.update_icon()
 		if(recharging_mech.loc != recharging_turf)

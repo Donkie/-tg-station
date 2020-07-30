@@ -258,7 +258,7 @@
 		chassis.obj_integrity += min(h_boost, chassis.max_integrity-chassis.obj_integrity)
 		repaired = 1
 	if(repaired)
-		if(!chassis.use_power(energy_drain))
+		if(!chassis.use_energy(energy_drain))
 			STOP_PROCESSING(SSobj, src)
 			set_ready_state(1)
 	else //no repair needed, we turn off
@@ -279,7 +279,6 @@
 	icon_state = "tesla"
 	energy_drain = 0
 	range = 0
-	var/coeff = 100
 	var/list/use_channels = list(AREA_USAGE_EQUIP,AREA_USAGE_ENVIRON,AREA_USAGE_LIGHT)
 	selectable = 0
 
@@ -348,9 +347,9 @@
 					pow_chan = c
 					break
 			if(pow_chan)
-				var/delta = min(20, chassis.cell.maxcharge-cur_charge)
-				chassis.give_power(delta)
-				A.use_power(delta*coeff, pow_chan)
+				var/delta = min(20, chassis.cell.maxcharge - cur_charge)
+				chassis.give_energy(delta)
+				A.use_energy(100 * delta, pow_chan)
 
 
 
@@ -363,7 +362,6 @@
 	desc = "An exosuit module that generates power using solid plasma as fuel. Pollutes the environment."
 	icon_state = "tesla"
 	range = MECHA_MELEE
-	var/coeff = 100
 	var/obj/item/stack/sheet/fuel
 	var/max_fuel = 150000
 	var/fuel_per_cycle_idle = 25
@@ -427,7 +425,7 @@
 /obj/item/mecha_parts/mecha_equipment/generator/attackby(weapon,mob/user, params)
 	load_fuel(weapon)
 
-/obj/item/mecha_parts/mecha_equipment/generator/process()
+/obj/item/mecha_parts/mecha_equipment/generator/process(delta_time)
 	if(!chassis)
 		STOP_PROCESSING(SSobj, src)
 		set_ready_state(1)
@@ -447,8 +445,8 @@
 	var/use_fuel = fuel_per_cycle_idle
 	if(cur_charge < chassis.cell.maxcharge)
 		use_fuel = fuel_per_cycle_active
-		chassis.give_power(power_per_cycle)
-	fuel.amount -= min(use_fuel/MINERAL_MATERIAL_AMOUNT,fuel.amount)
+		chassis.give_energy(power_per_cycle * delta_time)
+	fuel.amount -= min(delta_time * use_fuel / MINERAL_MATERIAL_AMOUNT,fuel.amount)
 	update_equip_info()
 	return 1
 
@@ -577,7 +575,7 @@
 /obj/item/mecha_parts/mecha_equipment/thrusters/ion/thrust(var/movement_dir)
 	if(!chassis)
 		return FALSE
-	if(chassis.use_power(chassis.step_energy_drain))
+	if(chassis.use_energy(chassis.step_energy_drain))
 		generate_effect(movement_dir)
 		return TRUE
 	return FALSE
