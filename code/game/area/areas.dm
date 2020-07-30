@@ -90,6 +90,7 @@
 	/// typecache to limit the areas that atoms in this area can smooth with, used for shuttles IIRC
 	var/list/canSmoothWithAreas
 
+	/// Contains the energy usage (for non-static channels, in joules) and power usage (for static channels, in watts)
 	var/list/power_usage
 
 

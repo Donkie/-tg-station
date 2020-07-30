@@ -94,7 +94,7 @@
 	var/beenhit = 0 // used for counting how many times it has been hit, used for Aliens at the moment
 	var/mob/living/silicon/ai/occupier = null
 	var/transfer_in_progress = FALSE //Is there an AI being transferred out of us?
-	var/longtermpower = 10
+	var/stable_charging = 10
 	var/auto_name = FALSE
 	var/failure_timer = 0
 	var/force_update = 0
@@ -162,8 +162,7 @@
 
 	// Find the wait delay from the subsystem
 	if(!delta_time)
-		var/datum/controller/subsystem/processing/subsystem = locate(subsystem_type) in Master.subsystems
-		delta_time = subsystem.wait / 10 // To seconds
+		delta_time = SSmachines.wait / 10 // To seconds
 
 	wires = new /datum/wires/apc(src)
 	// offset 24 pixels in direction of dir
@@ -1194,9 +1193,9 @@
 		return
 
 	// Consumed energy this tick [J]
-	lastused_light = area.electricity_usage[AREA_USAGE_LIGHT] + area.electricity_usage[AREA_USAGE_STATIC_LIGHT] * delta_time
-	lastused_equip = area.electricity_usage[AREA_USAGE_EQUIP] + area.electricity_usage[AREA_USAGE_STATIC_EQUIP] * delta_time
-	lastused_environ = area.electricity_usage[AREA_USAGE_ENVIRON] + area.electricity_usage[AREA_USAGE_STATIC_ENVIRON] * delta_time
+	lastused_light = area.power_usage[AREA_USAGE_LIGHT] + area.power_usage[AREA_USAGE_STATIC_LIGHT] * delta_time
+	lastused_equip = area.power_usage[AREA_USAGE_EQUIP] + area.power_usage[AREA_USAGE_STATIC_EQUIP] * delta_time
+	lastused_environ = area.power_usage[AREA_USAGE_ENVIRON] + area.power_usage[AREA_USAGE_STATIC_ENVIRON] * delta_time
 	area.clear_usage()
 
 	// Total consumed energy this tick [J]
@@ -1268,12 +1267,12 @@
 			charge_delaytick = 0
 			charging = APC_FULLY_CHARGED
 
-		// longtermpower is used to immediately turn all channels back on once we have a stable charging current
+		// stable_charging is used to immediately turn all channels back on once we have a stable charging current
 		// It increases to 10 while we're charging, and decreases to -10 while we're not charging
-		if(charging && longtermpower < 10)
-			longtermpower += 1
-		else if(longtermpower > -10)
-			longtermpower -= 2
+		if(charging && stable_charging < 10)
+			stable_charging += 1
+		else if(stable_charging > -10)
+			stable_charging -= 2
 
 		/*
 		Set channels depending on how much charge we have left
@@ -1285,13 +1284,13 @@
 			lighting = autoset(lighting, 0)
 			environ = autoset(environ, 0)
 			area.poweralert(0, src)
-		else if(cell.percent() < 15 && longtermpower < 0)
+		else if(cell.percent() < 15 && stable_charging < 0)
 			// <15%, turn off lighting & equipment
 			equipment = autoset(equipment, 2)
 			lighting = autoset(lighting, 2)
 			environ = autoset(environ, 1)
 			area.poweralert(0, src)
-		else if(cell.percent() < 30 && longtermpower < 0)
+		else if(cell.percent() < 30 && stable_charging < 0)
 			// <30%, turn off equipment
 			equipment = autoset(equipment, 2)
 			lighting = autoset(lighting, 1)
