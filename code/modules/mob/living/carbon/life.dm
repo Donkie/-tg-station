@@ -48,31 +48,43 @@
 // BREATHING //
 ///////////////
 
-//Start of a breath chain, calls breathe()
-/mob/living/carbon/handle_breathing(times_fired)
-	var/next_breath = 4
-	var/obj/item/organ/lungs/L = getorganslot(ORGAN_SLOT_LUNGS)
-	var/obj/item/organ/heart/H = getorganslot(ORGAN_SLOT_HEART)
-	if(L)
-		if(L.damage > L.high_threshold)
-			next_breath--
-	if(H)
-		if(H.damage > H.high_threshold)
-			next_breath--
+/**
+  * Start of the breath chain. Calls breath() in regular intervals.
+  */
+/mob/living/carbon/handle_breathing()
+	// If it's time to breath
+	if(breath_timer <= 0)
+		var/failed_last_breath = !breathe()
 
-	if((times_fired % next_breath) == 0 || failed_last_breath)
-		breathe() //Breathe per 4 ticks if healthy, down to 2 if our lungs or heart are damaged, unless suffocating
 		if(failed_last_breath)
 			SEND_SIGNAL(src, COMSIG_ADD_MOOD_EVENT, "suffocation", /datum/mood_event/suffocation)
+
+			// Breath every 2 sec if we failed to breath this time. All damages and volumes etc in breath() and check_breath() code are tuned for this interval.
+			// If SSMOBS_DT is lowered and you want to lower this as well, make sure to re-tune those values.
+			breath_timer += 2
 		else
 			SEND_SIGNAL(src, COMSIG_CLEAR_MOOD_EVENT, "suffocation")
-	else
-		if(istype(loc, /obj/))
-			var/obj/location_as_object = loc
-			location_as_object.handle_internal_lifeform(src,0)
 
-//Second link in a breath chain, calls check_breath()
+			// Breathe every 8 sec if healthy, down to every 4 sec if our lungs or heart are damaged
+			breath_timer += 8
+			var/obj/item/organ/lungs/L = getorganslot(ORGAN_SLOT_LUNGS)
+			var/obj/item/organ/heart/H = getorganslot(ORGAN_SLOT_HEART)
+			if(L)
+				if(L.damage > L.high_threshold)
+					breath_timer -= 2
+			if(H)
+				if(H.damage > H.high_threshold)
+					breath_timer -= 2
+
+	breath_timer -= SSMOBS_DT
+
+/**
+  * Second link in a breath chain. Attemps to take a breath somehow.
+  *
+  * Returns: FALSE if we failed to oxygenate the blood from the breath (due to lack of lungs, breath too small, too little oxygen, etc). TRUE otherwise.
+  */
 /mob/living/carbon/proc/breathe()
+	. = TRUE
 	var/obj/item/organ/lungs = getorganslot(ORGAN_SLOT_LUNGS)
 	if(has_reagent(/datum/reagent/toxin/lexorin, needs_metabolizing = TRUE))
 		return
@@ -97,9 +109,6 @@
 		losebreath--
 		if(prob(10))
 			emote("gasp")
-		if(istype(loc, /obj/))
-			var/obj/loc_as_obj = loc
-			loc_as_obj.handle_internal_lifeform(src,0)
 	else
 		//Breathe from internal
 		breath = get_breath_from_internal(BREATH_VOLUME)
@@ -108,7 +117,9 @@
 
 			if(isobj(loc)) //Breathe from loc as object
 				var/obj/loc_as_obj = loc
-				breath = loc_as_obj.handle_internal_lifeform(src, BREATH_VOLUME)
+				var/datum/gas_mixture/loc_environment = loc_as_obj.return_air()
+				var/breath_percentage = BREATH_VOLUME / loc_environment.return_volume()
+				breath = loc_as_obj.remove_air(loc_environment.total_moles() * breath_percentage)
 
 			else if(isturf(loc)) //Breathe from loc as turf
 				var/breath_moles = 0
@@ -116,12 +127,8 @@
 					breath_moles = environment.total_moles()*BREATH_PERCENTAGE
 
 				breath = loc.remove_air(breath_moles)
-		else //Breathe from loc as obj again
-			if(istype(loc, /obj/))
-				var/obj/loc_as_obj = loc
-				loc_as_obj.handle_internal_lifeform(src,0)
 
-	check_breath(breath)
+	. &= check_breath(breath)
 
 	if(breath)
 		loc.assume_air(breath)
@@ -133,8 +140,15 @@
 	return FALSE
 
 
-//Third link in a breath chain, calls handle_breath_temperature()
+/**
+  * Third link in the breath chain. Handles the effects of breathing in a gas mixture.
+  *
+  * Returns: FALSE if we failed to oxygenate the blood from the breath (due to lack of lungs, breath too small, too little oxygen, etc). TRUE otherwise.
+  * Arguments:
+  * * breath - The gas mixture we should breath in. This mixture will be updated with the to-be-exhaled gases.
+  */
 /mob/living/carbon/proc/check_breath(datum/gas_mixture/breath)
+	. = TRUE
 	if(status_flags & GODMODE)
 		return FALSE
 	if(HAS_TRAIT(src, TRAIT_NOBREATH))
@@ -150,7 +164,6 @@
 			return FALSE
 		adjustOxyLoss(1)
 
-		failed_last_breath = 1
 		throw_alert("not_enough_oxy", /obj/screen/alert/not_enough_oxy)
 		return FALSE
 
@@ -176,15 +189,13 @@
 		if(O2_partialpressure > 0)
 			var/ratio = 1 - O2_partialpressure/safe_oxy_min
 			adjustOxyLoss(min(5*ratio, 3))
-			failed_last_breath = 1
 			oxygen_used = breath_gases[/datum/gas/oxygen][MOLES]*ratio
 		else
 			adjustOxyLoss(3)
-			failed_last_breath = 1
+		. = FALSE
 		throw_alert("not_enough_oxy", /obj/screen/alert/not_enough_oxy)
 
 	else //Enough oxygen
-		failed_last_breath = 0
 		if(health >= crit_threshold)
 			adjustOxyLoss(-5)
 		oxygen_used = breath_gases[/datum/gas/oxygen][MOLES]

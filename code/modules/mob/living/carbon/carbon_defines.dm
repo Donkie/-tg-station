@@ -35,7 +35,8 @@
 	var/datum/dna/dna = null /// Carbon
 	var/datum/mind/last_mind = null ///last mind to control this mob, for blood-based cloning
 
-	var/failed_last_breath = 0 ///This is used to determine if the mob failed a breath. If they did fail a brath, they will attempt to breathe each tick, otherwise just once per 4 ticks.
+	var/failed_last_breath = FALSE /// TRUE if the last breath we took failed
+	var/breath_timer = 0 /// Take a breath when <= 0, in seconds, ticks down on every mob tick
 
 	var/co2overloadtime = null
 	var/temperature_resistance = T0C+75

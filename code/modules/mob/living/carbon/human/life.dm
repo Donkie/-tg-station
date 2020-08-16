@@ -85,7 +85,7 @@
 		else if(!HAS_TRAIT(src, TRAIT_NOCRITDAMAGE))
 			adjustOxyLoss(HUMAN_CRIT_MAX_OXYLOSS)
 
-		failed_last_breath = 1
+		. = FALSE
 
 		var/datum/species/S = dna.species
 
@@ -97,8 +97,6 @@
 			throw_alert("not_enough_co2", /obj/screen/alert/not_enough_co2)
 		else if(S.breathid == "n2")
 			throw_alert("not_enough_nitro", /obj/screen/alert/not_enough_nitro)
-
-		return FALSE
 	else
 		if(istype(L, /obj/item/organ/lungs))
 			var/obj/item/organ/lungs/lun = L

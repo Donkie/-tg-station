@@ -1550,9 +1550,15 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 //BREATHING//
 /////////////
 
+/**
+  * Second link in a breath chain. Attemps to take a breath somehow.
+  *
+  * Returns: TRUE if overriding default behaviour
+  */
 /datum/species/proc/breathe(mob/living/carbon/human/H)
 	if(HAS_TRAIT(H, TRAIT_NOBREATH))
 		return TRUE
+	return FALSE
 
 //////////////////////////
 // ENVIRONMENT HANDLERS //

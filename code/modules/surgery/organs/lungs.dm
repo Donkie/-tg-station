@@ -69,8 +69,16 @@
 
 	var/crit_stabilizing_reagent = /datum/reagent/medicine/epinephrine
 
-
+/**
+  * Handles the effects of breathing in a gas mixture.
+  *
+  * Returns: FALSE if we failed to oxygenate the blood from the breath (due to lack of lungs, breath too small, too little oxygen, etc). TRUE otherwise.
+  * Arguments:
+  * * breath - The gas mixture we should breath in. This mixture will be updated with the to-be-exhaled gases.
+  * * H - The human who the lungs belong to.
+  */
 /obj/item/organ/lungs/proc/check_breath(datum/gas_mixture/breath, mob/living/carbon/human/H)
+	. = TRUE
 	if(H.status_flags & GODMODE)
 		return
 	if(HAS_TRAIT(H, TRAIT_NOBREATH))
@@ -84,7 +92,7 @@
 		else if(!HAS_TRAIT(H, TRAIT_NOCRITDAMAGE))
 			H.adjustOxyLoss(HUMAN_CRIT_MAX_OXYLOSS)
 
-		H.failed_last_breath = TRUE
+		. = FALSE
 		if(safe_oxygen_min)
 			H.throw_alert("not_enough_oxy", /obj/screen/alert/not_enough_oxy)
 		else if(safe_toxins_min)
@@ -93,7 +101,7 @@
 			H.throw_alert("not_enough_co2", /obj/screen/alert/not_enough_co2)
 		else if(safe_nitro_min)
 			H.throw_alert("not_enough_nitro", /obj/screen/alert/not_enough_nitro)
-		return FALSE
+		return
 
 	var/gas_breathed = 0
 
@@ -124,8 +132,8 @@
 		if(O2_pp < safe_oxygen_min)
 			gas_breathed = handle_too_little_breath(H, O2_pp, safe_oxygen_min, breath_gases[/datum/gas/oxygen][MOLES])
 			H.throw_alert("not_enough_oxy", /obj/screen/alert/not_enough_oxy)
+			. = FALSE
 		else
-			H.failed_last_breath = FALSE
 			if(H.health >= H.crit_threshold)
 				H.adjustOxyLoss(-5)
 			gas_breathed = breath_gases[/datum/gas/oxygen][MOLES]
@@ -152,8 +160,8 @@
 		if(N2_pp < safe_nitro_min)
 			gas_breathed = handle_too_little_breath(H, N2_pp, safe_nitro_min, breath_gases[/datum/gas/nitrogen][MOLES])
 			H.throw_alert("nitro", /obj/screen/alert/not_enough_nitro)
+			. = FALSE
 		else
-			H.failed_last_breath = FALSE
 			if(H.health >= H.crit_threshold)
 				H.adjustOxyLoss(-5)
 			gas_breathed = breath_gases[/datum/gas/nitrogen][MOLES]
@@ -165,8 +173,6 @@
 	gas_breathed = 0
 
 	//-- CO2 --//
-
-	//CO2 does not affect failed_last_breath. So if there was enough oxygen in the air but too much co2, this will hurt you, but only once per 4 ticks, instead of once per tick.
 	if(safe_co2_max)
 		if(CO2_pp > safe_co2_max)
 			if(!H.co2overloadtime) // If it's the first breath with too much CO2 in it, lets start a counter, then have them pass out after 12s or so.
@@ -189,8 +195,8 @@
 		if(CO2_pp < safe_co2_min)
 			gas_breathed = handle_too_little_breath(H, CO2_pp, safe_co2_min, breath_gases[/datum/gas/carbon_dioxide][MOLES])
 			H.throw_alert("not_enough_co2", /obj/screen/alert/not_enough_co2)
+			. = FALSE
 		else
-			H.failed_last_breath = FALSE
 			if(H.health >= H.crit_threshold)
 				H.adjustOxyLoss(-5)
 			gas_breathed = breath_gases[/datum/gas/carbon_dioxide][MOLES]
@@ -219,8 +225,8 @@
 		if(Toxins_pp < safe_toxins_min)
 			gas_breathed = handle_too_little_breath(H, Toxins_pp, safe_toxins_min, breath_gases[/datum/gas/plasma][MOLES])
 			H.throw_alert("not_enough_tox", /obj/screen/alert/not_enough_tox)
+			. = FALSE
 		else
-			H.failed_last_breath = FALSE
 			if(H.health >= H.crit_threshold)
 				H.adjustOxyLoss(-5)
 			gas_breathed = breath_gases[/datum/gas/plasma][MOLES]
@@ -392,11 +398,9 @@
 	if(breath_pp > 0)
 		var/ratio = safe_breath_min/breath_pp
 		H.adjustOxyLoss(min(5*ratio, HUMAN_MAX_OXYLOSS)) // Don't fuck them up too fast (space only does HUMAN_MAX_OXYLOSS after all!
-		H.failed_last_breath = TRUE
 		. = true_pp*ratio/6
 	else
 		H.adjustOxyLoss(HUMAN_MAX_OXYLOSS)
-		H.failed_last_breath = TRUE
 
 
 /obj/item/organ/lungs/proc/handle_breath_temperature(datum/gas_mixture/breath, mob/living/carbon/human/H) // called by human/life, handles temperatures
