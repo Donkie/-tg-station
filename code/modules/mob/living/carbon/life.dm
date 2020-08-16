@@ -366,7 +366,7 @@
 /mob/living/carbon/handle_diseases()
 	for(var/thing in diseases)
 		var/datum/disease/D = thing
-		if(prob(D.infectivity))
+		if(DT_PROB(DISEASE_SPREADPROB, SSMOBS_DT))
 			D.spread()
 
 		if(stat != DEAD || D.process_dead)

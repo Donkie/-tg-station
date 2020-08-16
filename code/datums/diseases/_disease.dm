@@ -21,7 +21,6 @@
 	var/list/viable_mobtypes = list() //typepaths of viable mobs
 	var/mob/living/carbon/affected_mob = null
 	var/list/cures = list() //list of cures if the disease has the CURABLE flag, these are reagent ids
-	var/infectivity = 65
 	var/cure_chance = 8
 	var/carrier = FALSE //If our host is only a carrier
 	var/bypasses_immunity = FALSE //Does it skip species virus immunity check? Some things may diseases and not viruses
@@ -143,7 +142,7 @@
 /datum/disease/proc/Copy()
 	//note that stage is not copied over - the copy starts over at stage 1
 	var/static/list/copy_vars = list("name", "visibility_flags", "disease_flags", "spread_flags", "form", "desc", "agent", "spread_text",
-									"cure_text", "max_stages", "stage_prob", "viable_mobtypes", "cures", "infectivity", "cure_chance",
+									"cure_text", "max_stages", "stage_prob", "viable_mobtypes", "cures", "cure_chance",
 									"bypasses_immunity", "permeability_mod", "severity", "required_organs", "needs_all_cures", "strain_data",
 									"infectable_biotypes", "process_dead")
 

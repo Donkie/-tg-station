@@ -2,6 +2,9 @@
 #define DISEASE_LIMIT		1
 #define VIRUS_SYMPTOM_LIMIT	6
 
+/// % Chance of disease spreading per second
+#define DISEASE_SPREADPROB  41
+
 //Visibility Flags
 #define HIDDEN_SCANNER	(1<<0)
 #define HIDDEN_PANDEMIC	(1<<1)
