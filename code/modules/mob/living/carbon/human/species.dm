@@ -1181,24 +1181,24 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	. = FALSE
 	var/radiation = H.radiation
 
-	if(radiation > RAD_MOB_KNOCKDOWN && prob(RAD_MOB_KNOCKDOWN_PROB))
+	if(radiation > RAD_MOB_KNOCKDOWN && DT_PROB(RAD_MOB_KNOCKDOWN_PROB, SSMOBS_DT))
 		if(!H.IsParalyzed())
 			H.emote("collapse")
 		H.Paralyze(RAD_MOB_KNOCKDOWN_AMOUNT)
 		to_chat(H, "<span class='danger'>You feel weak.</span>")
 
-	if(radiation > RAD_MOB_VOMIT && prob(RAD_MOB_VOMIT_PROB))
+	if(radiation > RAD_MOB_VOMIT && DT_PROB(RAD_MOB_VOMIT_PROB, SSMOBS_DT))
 		H.vomit(10, TRUE)
 
 	if(radiation > RAD_MOB_MUTATE)
-		if(prob(1))
+		if(DT_PROB(0.5, SSMOBS_DT))
 			to_chat(H, "<span class='danger'>You mutate!</span>")
 			H.easy_randmut(NEGATIVE+MINOR_NEGATIVE)
 			H.emote("gasp")
 			H.domutcheck()
 
 	if(radiation > RAD_MOB_HAIRLOSS)
-		if(prob(15) && !(H.hairstyle == "Bald") && (HAIR in species_traits))
+		if(DT_PROB(7.5, SSMOBS_DT) && !(H.hairstyle == "Bald") && (HAIR in species_traits))
 			to_chat(H, "<span class='danger'>Your hair starts to fall out in clumps...</span>")
 			addtimer(CALLBACK(src, .proc/go_bald, H), 50)
 

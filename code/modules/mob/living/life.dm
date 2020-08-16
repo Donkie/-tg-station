@@ -1,7 +1,7 @@
 /// This divisor controls how fast body temperature changes to match the environment
 #define BODYTEMP_DIVISOR 8
 
-/mob/living/proc/Life(seconds, times_fired)
+/mob/living/proc/Life(times_fired)
 	set waitfor = FALSE
 
 	if((movement_type & FLYING) && !(movement_type & FLOATING))	//TODO: Better floating
@@ -38,7 +38,6 @@
 			//Mutations and radiation
 			handle_mutations_and_radiation()
 
-		if(stat != DEAD)
 			//Breathing, if applicable
 			handle_breathing(times_fired)
 

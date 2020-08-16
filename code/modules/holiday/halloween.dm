@@ -134,16 +134,16 @@
 	icon_state = pick("ghost","ghostian","ghostian2","ghostking","ghost1","ghost2")
 	icon_living = icon_state
 	status_flags |= GODMODE
-	timer = rand(1,15)
+	timer = rand(2,30)
 
 /mob/living/simple_animal/shade/howling_ghost/Life()
 	..()
-	timer--
-	if(prob(20))
+	timer -= SSMOBS_DT
+	if(DT_PROB(10, SSMOBS_DT))
 		roam()
-	if(timer == 0)
+	if(timer <= 0)
 		spooky_ghosty()
-		timer = rand(1,15)
+		timer = rand(2, 30)
 
 /mob/living/simple_animal/shade/howling_ghost/proc/EtherealMove(direction)
 	forceMove(get_step(src, direction))

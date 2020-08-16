@@ -28,22 +28,22 @@
 
 /mob/living/carbon/monkey/handle_mutations_and_radiation()
 	if(radiation)
-		if(radiation > RAD_MOB_KNOCKDOWN && prob(RAD_MOB_KNOCKDOWN_PROB))
+		if(radiation > RAD_MOB_KNOCKDOWN && DT_PROB(RAD_MOB_KNOCKDOWN_PROB, SSMOBS_DT))
 			if(!IsParalyzed())
 				emote("collapse")
 			Paralyze(RAD_MOB_KNOCKDOWN_AMOUNT)
 			to_chat(src, "<span class='danger'>You feel weak.</span>")
 		if(radiation > RAD_MOB_MUTATE)
-			if(prob(1))
+			if(DT_PROB(0.5, SSMOBS_DT))
 				to_chat(src, "<span class='danger'>You mutate!</span>")
 				easy_randmut(NEGATIVE+MINOR_NEGATIVE)
 				emote("gasp")
 				domutcheck()
 
-				if(radiation > RAD_MOB_MUTATE * 2 && prob(50))
+				if(radiation > RAD_MOB_MUTATE * 2 && DT_PROB(29, SSMOBS_DT))
 					gorillize()
 					return
-		if(radiation > RAD_MOB_VOMIT && prob(RAD_MOB_VOMIT_PROB))
+		if(radiation > RAD_MOB_VOMIT && DT_PROB(RAD_MOB_VOMIT_PROB, SSMOBS_DT))
 			vomit(10, TRUE)
 	return ..()
 

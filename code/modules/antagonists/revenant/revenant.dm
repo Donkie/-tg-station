@@ -57,7 +57,7 @@
 	var/essence = 75 //The resource, and health, of revenants.
 	var/essence_regen_cap = 75 //The regeneration cap of essence (go figure); regenerates every Life() tick up to this amount.
 	var/essence_regenerating = TRUE //If the revenant regenerates essence or not
-	var/essence_regen_amount = 5 //How much essence regenerates
+	var/essence_regen_amount = 2.5 //How much essence regenerates per second
 	var/essence_accumulated = 0 //How much essence the revenant has stolen
 	var/essence_excess = 0 //How much stolen essence avilable for unlocks
 	var/revealed = FALSE //If the revenant can take damage from normal sources.
@@ -129,7 +129,7 @@
 		notransform = FALSE
 		to_chat(src, "<span class='revenboldnotice'>You can move again!</span>")
 	if(essence_regenerating && !inhibited && essence < essence_regen_cap) //While inhibited, essence will not regenerate
-		essence = min(essence_regen_cap, essence+essence_regen_amount)
+		essence = min(essence_regen_cap, essence+essence_regen_amount*SSMOBS_DT)
 		update_action_buttons_icon() //because we update something required by our spells in life, we need to update our buttons
 	update_spooky_icon()
 	update_health_hud()

@@ -407,9 +407,9 @@
 			if(HM && HM.timed)
 				dna.remove_mutation(HM.type)
 
-	radiation -= min(radiation, RAD_LOSS_PER_TICK)
+	radiation -= min(radiation, RAD_LOSS_PER_SEC * SSMOBS_DT)
 	if(radiation > RAD_MOB_SAFE)
-		adjustToxLoss(log(radiation-RAD_MOB_SAFE)*RAD_TOX_COEFFICIENT)
+		adjustToxLoss(log(radiation-RAD_MOB_SAFE)*RAD_TOX_COEFFICIENT*SSMOBS_DT)
 
 
 /*
