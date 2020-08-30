@@ -186,6 +186,12 @@
 	if(QDELETED(wielder) || is_obscured())
 		return
 
+	last_pickup = world.time
+
+	// Only pick up blood from splatters with any remarkable amount of blood
+	if(pool.bloodiness < BLOOD_PICKUP_MIN)
+		return
+
 	if(istype(pool, /obj/effect/decal/cleanable/blood/footprints) && pool.blood_state == last_blood_state)
 		// The pool we stepped in was actually footprints with the same type
 		var/obj/effect/decal/cleanable/blood/footprints/pool_FP = pool
@@ -196,8 +202,6 @@
 			pool_FP.update_icon()
 
 	share_blood(pool)
-
-	last_pickup = world.time
 
 /**
   * Called when the parent item is being washed
