@@ -54,7 +54,7 @@
 /mob/living/carbon/handle_breathing()
 	// If it's time to breath
 	if(breath_timer <= 0)
-		var/failed_last_breath = !breathe()
+		failed_last_breath = !breathe()
 
 		if(failed_last_breath)
 			SEND_SIGNAL(src, COMSIG_ADD_MOOD_EVENT, "suffocation", /datum/mood_event/suffocation)
