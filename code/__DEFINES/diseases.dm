@@ -5,6 +5,9 @@
 /// % Chance of disease spreading per second
 #define DISEASE_SPREADPROB  41
 
+/// How often the stage_act of diseases is called, in seconds
+#define DISEASE_ACTPERIOD 2
+
 //Visibility Flags
 #define HIDDEN_SCANNER	(1<<0)
 #define HIDDEN_PANDEMIC	(1<<1)

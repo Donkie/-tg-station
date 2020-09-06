@@ -370,7 +370,10 @@
 			D.spread()
 
 		if(stat != DEAD || D.process_dead)
-			D.stage_act(delta_time)
+			if(diseases_proc_timer <= 0)
+				D.stage_act()
+				diseases_proc_timer += DISEASE_ACTPERIOD
+			diseases_proc_timer -= delta_time
 
 /mob/living/carbon/handle_wounds()
 	for(var/thing in all_wounds)

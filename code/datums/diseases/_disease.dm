@@ -62,7 +62,13 @@
 	return "[src.name] : [src.type]"
 
 
-///Proc to process the disease and decide on whether to advance, cure or make the sympthoms appear. Returns a boolean on whether to continue acting on the symptoms or not.
+/**
+  * Proc to process the disease and decide on whether to advance, cure or make the sympthoms appear.
+  *
+  * Called every DISEASE_ACTPERIOD second, independent of SSmobs's wait
+  *
+  * Returns: a boolean on whether to continue acting on the symptoms or not.
+  */
 /datum/disease/proc/stage_act()
 	if(has_cure())
 		if(prob(cure_chance))

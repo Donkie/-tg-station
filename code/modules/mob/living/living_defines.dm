@@ -136,6 +136,9 @@
 	var/list/diseases /// list of all diseases in a mob
 	var/list/disease_resistances
 
+	/// In seconds, counts down and the diseases's stage_act is called when <= 0
+	var/diseases_proc_timer = 0
+
 	var/slowed_by_drag = TRUE ///Whether the mob is slowed down when dragging another prone mob
 
 	var/list/ownedSoullinks //soullinks we are the owner of
