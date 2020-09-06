@@ -51,7 +51,7 @@
 /**
   * Start of the breath chain. Calls breath() in regular intervals.
   */
-/mob/living/carbon/handle_breathing()
+/mob/living/carbon/handle_breathing(delta_time)
 	// If it's time to breath
 	if(breath_timer <= 0)
 		failed_last_breath = !breathe()
@@ -76,7 +76,7 @@
 				if(H.damage > H.high_threshold)
 					breath_timer -= 2
 
-	breath_timer -= SSMOBS_DT
+	breath_timer -= delta_time
 
 /**
   * Second link in a breath chain. Attemps to take a breath somehow.
@@ -363,14 +363,14 @@
 			var/obj/item/organ/O = V
 			O.on_death() //Needed so organs decay while inside the body.
 
-/mob/living/carbon/handle_diseases()
+/mob/living/carbon/handle_diseases(delta_time)
 	for(var/thing in diseases)
 		var/datum/disease/D = thing
-		if(DT_PROB(DISEASE_SPREADPROB, SSMOBS_DT))
+		if(DT_PROB(DISEASE_SPREADPROB, delta_time))
 			D.spread()
 
 		if(stat != DEAD || D.process_dead)
-			D.stage_act()
+			D.stage_act(delta_time)
 
 /mob/living/carbon/handle_wounds()
 	for(var/thing in all_wounds)
@@ -390,7 +390,7 @@
 			hud_used.lingchemdisplay.invisibility = INVISIBILITY_ABSTRACT
 
 
-/mob/living/carbon/handle_mutations_and_radiation()
+/mob/living/carbon/handle_mutations_and_radiation(delta_time)
 	if(dna && dna.temporary_mutations.len)
 		for(var/mut in dna.temporary_mutations)
 			if(dna.temporary_mutations[mut] < world.time)
@@ -418,9 +418,9 @@
 			if(HM && HM.timed)
 				dna.remove_mutation(HM.type)
 
-	radiation -= min(radiation, RAD_LOSS_PER_SEC * SSMOBS_DT)
+	radiation -= min(radiation, RAD_LOSS_PER_SEC * delta_time)
 	if(radiation > RAD_MOB_SAFE)
-		adjustToxLoss(log(radiation-RAD_MOB_SAFE)*RAD_TOX_COEFFICIENT*SSMOBS_DT)
+		adjustToxLoss(log(radiation-RAD_MOB_SAFE)*RAD_TOX_COEFFICIENT*delta_time)
 
 
 /*

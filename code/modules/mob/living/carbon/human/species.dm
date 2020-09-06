@@ -1173,7 +1173,7 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 /datum/species/proc/update_health_hud(mob/living/carbon/human/H)
 	return FALSE
 
-/datum/species/proc/handle_mutations_and_radiation(mob/living/carbon/human/H)
+/datum/species/proc/handle_mutations_and_radiation(mob/living/carbon/human/H, delta_time)
 	if(HAS_TRAIT(H, TRAIT_RADIMMUNE))
 		H.radiation = 0
 		return TRUE
@@ -1181,24 +1181,24 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	. = FALSE
 	var/radiation = H.radiation
 
-	if(radiation > RAD_MOB_KNOCKDOWN && DT_PROB(RAD_MOB_KNOCKDOWN_PROB, SSMOBS_DT))
+	if(radiation > RAD_MOB_KNOCKDOWN && DT_PROB(RAD_MOB_KNOCKDOWN_PROB, delta_time))
 		if(!H.IsParalyzed())
 			H.emote("collapse")
 		H.Paralyze(RAD_MOB_KNOCKDOWN_AMOUNT)
 		to_chat(H, "<span class='danger'>You feel weak.</span>")
 
-	if(radiation > RAD_MOB_VOMIT && DT_PROB(RAD_MOB_VOMIT_PROB, SSMOBS_DT))
+	if(radiation > RAD_MOB_VOMIT && DT_PROB(RAD_MOB_VOMIT_PROB, delta_time))
 		H.vomit(10, TRUE)
 
 	if(radiation > RAD_MOB_MUTATE)
-		if(DT_PROB(0.5, SSMOBS_DT))
+		if(DT_PROB(0.5, delta_time))
 			to_chat(H, "<span class='danger'>You mutate!</span>")
 			H.easy_randmut(NEGATIVE+MINOR_NEGATIVE)
 			H.emote("gasp")
 			H.domutcheck()
 
 	if(radiation > RAD_MOB_HAIRLOSS)
-		if(DT_PROB(7.5, SSMOBS_DT) && !(H.hairstyle == "Bald") && (HAIR in species_traits))
+		if(DT_PROB(7.5, delta_time) && !(H.hairstyle == "Bald") && (HAIR in species_traits))
 			to_chat(H, "<span class='danger'>Your hair starts to fall out in clumps...</span>")
 			addtimer(CALLBACK(src, .proc/go_bald, H), 50)
 

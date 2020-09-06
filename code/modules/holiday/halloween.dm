@@ -136,10 +136,10 @@
 	status_flags |= GODMODE
 	timer = rand(2,30)
 
-/mob/living/simple_animal/shade/howling_ghost/Life()
+/mob/living/simple_animal/shade/howling_ghost/Life(delta_time)
 	..()
-	timer -= SSMOBS_DT
-	if(DT_PROB(10, SSMOBS_DT))
+	timer -= delta_time
+	if(DT_PROB(10, delta_time))
 		roam()
 	if(timer <= 0)
 		spooky_ghosty()

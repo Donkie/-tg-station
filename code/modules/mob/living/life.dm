@@ -1,7 +1,7 @@
 /// This divisor controls how fast body temperature changes to match the environment
 #define BODYTEMP_DIVISOR 8
 
-/mob/living/proc/Life(times_fired)
+/mob/living/proc/Life(delta_time, times_fired)
 	set waitfor = FALSE
 
 	if((movement_type & FLYING) && !(movement_type & FLOATING))	//TODO: Better floating
@@ -36,34 +36,34 @@
 
 		if(stat != DEAD)
 			//Mutations and radiation
-			handle_mutations_and_radiation()
+			handle_mutations_and_radiation(delta_time)
 
 			//Breathing, if applicable
-			handle_breathing(times_fired)
+			handle_breathing(delta_time, times_fired)
 
-		handle_diseases()// DEAD check is in the proc itself; we want it to spread even if the mob is dead, but to handle its disease-y properties only if you're not.
+		handle_diseases(delta_time)// DEAD check is in the proc itself; we want it to spread even if the mob is dead, but to handle its disease-y properties only if you're not.
 
-		handle_wounds()
+		handle_wounds(delta_time)
 
 		if (QDELETED(src)) // diseases can qdel the mob via transformations
 			return
 
 		if(stat != DEAD)
 			//Random events (vomiting etc)
-			handle_random_events()
+			handle_random_events(delta_time)
 
 		//Handle temperature/pressure differences between body and environment
 		var/datum/gas_mixture/environment = loc.return_air()
 		if(environment)
-			handle_environment(environment)
+			handle_environment(delta_time, environment)
 
-		handle_gravity()
+		handle_gravity(delta_time)
 
 		if(stat != DEAD)
-			handle_traits() // eye, ear, brain damages
-			handle_status_effects() //all special effects, stun, knockdown, jitteryness, hallucination, sleeping, etc
+			handle_traits(delta_time) // eye, ear, brain damages
+			handle_status_effects(delta_time) //all special effects, stun, knockdown, jitteryness, hallucination, sleeping, etc
 
-	handle_fire()
+	handle_fire(delta_time)
 
 	if(machine)
 		machine.check_eye(src)
@@ -71,14 +71,14 @@
 	if(stat != DEAD)
 		return 1
 
-/mob/living/proc/handle_breathing(times_fired)
+/mob/living/proc/handle_breathing(delta_time, times_fired)
 	return
 
-/mob/living/proc/handle_mutations_and_radiation()
+/mob/living/proc/handle_mutations_and_radiation(delta_time)
 	radiation = 0 //so radiation don't accumulate in simple animals
 	return
 
-/mob/living/proc/handle_diseases()
+/mob/living/proc/handle_diseases(delta_time)
 	return
 
 /mob/living/proc/handle_wounds()
