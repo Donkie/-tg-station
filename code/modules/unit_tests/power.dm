@@ -53,6 +53,7 @@
 	var/obj/item/stock_parts/cell/cell = allocate(/obj/item/stock_parts/cell, charger)
 	cell.charge = 0
 	charger.charging = cell
+	charger.efficiency = 1 // Easier to test stuff assuming this
 
 	//
 	// Execution

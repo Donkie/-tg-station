@@ -1,7 +1,3 @@
-
-/// Cell charger efficiency, 0.99 means its 99% efficient, 1% of energy goes to waste
-#define CELLCHARGER_EFFICIENCY 0.99
-
 /obj/machinery/cell_charger
 	name = "cell charger"
 	desc = "It charges power cells."
@@ -15,6 +11,8 @@
 	pass_flags = PASSTABLE
 	var/obj/item/stock_parts/cell/charging = null
 	var/charge_rate = 250e3
+	/// Cell charger efficiency, 0.99 means its 99% efficient, 1% of energy goes to waste
+	var/efficiency = 0.99
 
 /obj/machinery/cell_charger/update_overlays()
 	. = ..()
@@ -133,8 +131,6 @@
 	if(charging.percent() >= 100)
 		return
 
-	use_energy(charging.give(charge_rate * delta_time) / CELLCHARGER_EFFICIENCY)
+	use_energy(charging.give(charge_rate * delta_time) / efficiency)
 
 	update_icon()
-
-#undef CELLCHARGER_EFFICIENCY
