@@ -11,6 +11,8 @@
 	pass_flags = PASSTABLE
 	var/obj/item/stock_parts/cell/charging = null
 	var/charge_rate = 250
+	/// Charging efficiency
+	var/efficiency = 0.99
 
 /obj/machinery/cell_charger/update_overlays()
 	. = ..()
@@ -133,6 +135,6 @@
 	if(!main_draw)
 		return
 	charging.give(main_draw)
-	use_power(charge_rate / 100) //use a small bit for the charger itself, but power usage scales up with the part tier
+	use_power(charge_rate * (1 - efficiency)) //use a small bit for the charger itself, but power usage scales up with the part tier
 
 	update_icon()
