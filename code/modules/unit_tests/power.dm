@@ -110,7 +110,7 @@
 
 	// Fire the taser until empty
 	var/shots = 0
-	while(taser.can_shoot())
+	while(taser.can_shoot() && shots < 10)
 		taser.chambered.BB = null
 		taser.process_chamber()
 		shots++
